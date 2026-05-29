@@ -1,0 +1,44 @@
+{
+  "model_blacklist": {
+    "type": "list",
+    "description": "模型黑名单，AI 创建子 Agent 时不能选择这些模型",
+    "default": []
+  },
+  "model_filter_mode": {
+    "type": "string",
+    "description": "模型过滤模式",
+    "options": ["blacklist", "whitelist"],
+    "labels": ["黑名单", "白名单"],
+    "default": "blacklist"
+  },
+  "allowed_models": {
+    "type": "list",
+    "description": "模型白名单（仅 whitelist 模式生效）",
+    "default": []
+  },
+  "max_handoffs_per_event": {
+    "type": "int",
+    "description": "单次对话中 handoff 转交次数上限，超过后自动熔断防止死循环",
+    "default": 20
+  },
+  "max_spawns_per_event": {
+    "type": "int",
+    "description": "单次对话中最多可创建的子 Agent 数量",
+    "default": 10
+  },
+  "default_max_depth": {
+    "type": "int",
+    "description": "子 Agent 默认的最大嵌套深度（1-10）",
+    "default": 3
+  },
+  "default_timeout": {
+    "type": "float",
+    "description": "子 Agent 默认超时时间（秒，5-600）",
+    "default": 120.0
+  },
+  "trace_enabled": {
+    "type": "bool",
+    "description": "是否启用子 Agent 协作追踪记录",
+    "default": true
+  }
+}
