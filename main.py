@@ -42,29 +42,33 @@ _PERMISSION_TOOLS = {
 
 _MAX_SPAWN = 10
 _MAX_TRACE = 50
+# 上下文历史最大轮数（防止 system prompt 过长）
+_MAX_CONTEXT_TURNS = 20
 
 
-@register(name="dynamic_subagent", desc="让 AI 动态创建和管理子 Agent", author="maomaosamaqwq", version="0.5.6")
+@register(name="dynamic_subagent", desc="让 AI 动态创建和管理子 Agent", author="maomaosamaqwq", version="0.6.0")
 class DynamicSubAgentPlugin(Star):
     def __init__(self, context: Context, config: dict = None):
         super().__init__(context)
         self._ctx = context
         self._cfg = config or {}
         self._store = SubAgentStore()
-        # Bug #5 fix: 改用 set 记录已创建的 agent id，删除时同步移除
         self._spawned_ids: set[str] = set()
         self._traces: dict[str, list[dict]] = {}
-        # Bug #2 fix: 持久化子 Agent 执行结果，供主 Agent 回溯
         self._sub_results: dict[str, list[dict]] = {}
+        # Bug #2 fix: 每个 Agent 的会话历史（内存）
+        self._agent_contexts: dict[str, list[dict]] = {}
 
         self._load_store()
 
     # ── Lifecycle ──
 
     async def initialize(self):
-        logger.info("DynamicSubAgent v0.5.6 已初始化")
+        logger.info("DynamicSubAgent v0.6.0 已初始化")
 
     async def terminate(self):
+        # 退出时保存所有 persistent agent 的上下文
+        self._save_all_contexts()
         logger.info("DynamicSubAgent 已停止")
 
     # ── Persistence ──
@@ -73,6 +77,11 @@ class DynamicSubAgentPlugin(Star):
         d = os.path.join(os.path.dirname(__file__), "data")
         os.makedirs(d, exist_ok=True)
         return os.path.join(d, "subagent_store.json")
+
+    def _context_path(self) -> str:
+        d = os.path.join(os.path.dirname(__file__), "data")
+        os.makedirs(d, exist_ok=True)
+        return os.path.join(d, "subagent_contexts.json")
 
     def _load_store(self):
         try:
@@ -87,6 +96,16 @@ class DynamicSubAgentPlugin(Star):
         except Exception as e:
             logger.warning(f"DynamicSubAgent: 加载持久化失败: {e}")
 
+        # 加载 persistent agent 的上下文历史
+        try:
+            cp = self._context_path()
+            if os.path.exists(cp):
+                with open(cp, "r", encoding="utf-8") as f:
+                    self._agent_contexts = json.load(f)
+                logger.info(f"DynamicSubAgent: 已加载 {len(self._agent_contexts)} 个 Agent 上下文")
+        except Exception as e:
+            logger.warning(f"DynamicSubAgent: 加载上下文失败: {e}")
+
     def _save_store(self):
         try:
             data = {"agents": {aid: asdict(cfg) for aid, cfg in self._store.agents.items()}}
@@ -94,6 +113,31 @@ class DynamicSubAgentPlugin(Star):
                 json.dump(data, f, ensure_ascii=False, indent=2)
         except Exception as e:
             logger.error(f"DynamicSubAgent: 保存持久化失败: {e}")
+
+    def _save_context(self, agent_id: str):
+        """保存单个 Agent 的上下文到文件"""
+        try:
+            cp = self._context_path()
+            # 加载现有
+            existing = {}
+            if os.path.exists(cp):
+                with open(cp, "r", encoding="utf-8") as f:
+                    existing = json.load(f)
+            if agent_id in self._agent_contexts:
+                existing[agent_id] = self._agent_contexts[agent_id]
+            with open(cp, "w", encoding="utf-8") as f:
+                json.dump(existing, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            logger.error(f"DynamicSubAgent: 保存上下文失败: {e}")
+
+    def _save_all_contexts(self):
+        """保存所有 Agent 上下文到文件"""
+        try:
+            cp = self._context_path()
+            with open(cp, "w", encoding="utf-8") as f:
+                json.dump(self._agent_contexts, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            logger.error(f"DynamicSubAgent: 保存全部上下文失败: {e}")
 
     # ── Helper: 查找 agent ──
 
@@ -128,12 +172,30 @@ class DynamicSubAgentPlugin(Star):
             event.unified_msg_origin
         )
         sub_tools = self._build_sub_tools(cfg.permission_level)
-        system_prompt = (
-            f"你是子 Agent [{cfg.name}]。\n"
-            f"描述: {cfg.description}\n"
-            f"指令: {cfg.instruction}\n"
-            f"请根据任务使用合适的工具完成工作。"
-        )
+
+        # ── 构建 system prompt，注入上下文历史 ──
+        system_parts = [
+            f"你是子 Agent [{cfg.name}]。",
+            f"描述: {cfg.description}",
+            f"指令: {cfg.instruction}",
+        ]
+
+        # 注入历史上下文（如果有）
+        ctx_history = self._agent_contexts.get(cfg.id, [])
+        if ctx_history:
+            history_lines = ["以下是你之前的对话历史，请参考上下文回答："]
+            for i, turn in enumerate(ctx_history, 1):
+                history_lines.append(f"[轮次 {i}] 任务: {turn['task']}")
+                # 截断过长的结果，只保留前 500 字符
+                result_preview = turn['result'][:500]
+                if len(turn['result']) > 500:
+                    result_preview += "..."
+                history_lines.append(f"[轮次 {i}] 结果: {result_preview}")
+            system_parts.append("\n".join(history_lines))
+
+        system_parts.append("请根据任务使用合适的工具完成工作。")
+        system_prompt = "\n\n".join(system_parts)
+
         llm_resp = await self.context.tool_loop_agent(
             event=event,
             chat_provider_id=prov_id,
@@ -141,7 +203,25 @@ class DynamicSubAgentPlugin(Star):
             system_prompt=system_prompt,
             tools=sub_tools,
         )
-        return llm_resp.completion_text if llm_resp else "(无返回结果)"
+        result_text = llm_resp.completion_text if llm_resp else "(无返回结果)"
+
+        # ── 保存到上下文历史 ──
+        if cfg.id not in self._agent_contexts:
+            self._agent_contexts[cfg.id] = []
+        self._agent_contexts[cfg.id].append({
+            "task": task,
+            "result": result_text,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        })
+        # 截断过长历史
+        if len(self._agent_contexts[cfg.id]) > _MAX_CONTEXT_TURNS:
+            self._agent_contexts[cfg.id] = self._agent_contexts[cfg.id][-_MAX_CONTEXT_TURNS:]
+
+        # persistent agent 的上下文持久化到文件
+        if cfg.id in self._store.agents:
+            self._save_context(cfg.id)
+
+        return result_text
 
     # ── LLM Tools ──
 
@@ -164,7 +244,8 @@ class DynamicSubAgentPlugin(Star):
         如果同时传入 task 参数，创建后会自动让子 Agent 执行该任务并返回结果。
         如果不传 task，则仅注册，后续可通过 transfer_to_agent(name="xxx", task="...") 调用。
 
-        建议传 task 一步到位，让子 Agent 创建后立即执行。
+        persistent=true 时，Agent 的对话历史会跨调用保留。
+        下次 transfer_to_agent 调用时，Agent 能记住之前的任务和结果。
 
         Args:
             name(string): 子 Agent 名称（英文/数字/下划线，用作标识）
@@ -174,7 +255,7 @@ class DynamicSubAgentPlugin(Star):
             permission_level(string): 权限级别 (safe/medium/full)，默认 safe
             provider_id(string): 使用的 provider ID，不传则继承主 Agent
             model(string): 使用的模型名，不传则继承主 Agent
-            persistent(boolean): 是否持久化（跨重启），默认 false
+            persistent(boolean): 是否持久化（跨重启 + 上下文保留），默认 false
         """
         if len(self._spawned_ids) >= _MAX_SPAWN:
             return f"已达到子 Agent 创建上限（{_MAX_SPAWN}），无法创建"
@@ -218,14 +299,11 @@ class DynamicSubAgentPlugin(Star):
             try:
                 result_text = await self._execute_sub_agent(event, cfg, task)
                 self._traces[event.unified_msg_origin][-1]["status"] = "completed"
-
-                # 持久化结果
                 self._sub_results.setdefault(event.unified_msg_origin, []).append({
                     "agent_name": name, "agent_id": agent_id,
                     "task": task, "result": result_text,
                     "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S"),
                 })
-
                 return (
                     f"子 Agent [{name}] 创建并执行任务完成！\n"
                     f"任务: {task}\n"
@@ -257,7 +335,8 @@ class DynamicSubAgentPlugin(Star):
         """
         将任务转交给已创建的子 Agent 执行。
 
-        调用前请确保子 Agent 已通过 spawn_agent 创建。
+        对于 persistent Agent，会自动注入之前的对话历史作为上下文，
+        Agent 能记住之前的任务和结果。
 
         Args:
             name(string): 子 Agent 名称（需与 spawn_agent 时的 name 一致）
@@ -276,7 +355,6 @@ class DynamicSubAgentPlugin(Star):
 
         cfg = self._store.agents[aid]
 
-        # 追踪
         self._traces.setdefault(event.unified_msg_origin, []).append({
             "agent_name": name, "agent_id": cfg.id,
             "action": "transfer", "task": task,
@@ -287,18 +365,19 @@ class DynamicSubAgentPlugin(Star):
         try:
             result_text = await self._execute_sub_agent(event, cfg, task)
 
-            # 更新追踪
             self._traces[event.unified_msg_origin][-1]["status"] = "completed"
-
-            # 持久化结果
             self._sub_results.setdefault(event.unified_msg_origin, []).append({
                 "agent_name": name, "agent_id": cfg.id,
                 "task": task, "result": result_text,
                 "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S"),
             })
 
+            # 提示 Agent 是否有历史上下文
+            ctx_count = len(self._agent_contexts.get(cfg.id, []))
+            ctx_hint = f"\n（Agent 已有 {ctx_count} 轮历史上下文）" if ctx_count > 1 else ""
+
             return (
-                f"子 Agent [{name}] 执行完成。\n"
+                f"子 Agent [{name}] 执行完成。{ctx_hint}\n"
                 f"任务: {task}\n"
                 f"结果:\n{result_text}"
             )
@@ -315,8 +394,10 @@ class DynamicSubAgentPlugin(Star):
 
         lines = ["当前活跃的子 Agent:"]
         for aid, cfg in self._store.agents.items():
+            ctx_count = len(self._agent_contexts.get(aid, []))
+            ctx_info = f" 历史:{ctx_count}轮" if ctx_count > 0 else ""
             lines.append(
-                f"  [{cfg.name}] 权限:{cfg.permission_level} "
+                f"  [{cfg.name}] 权限:{cfg.permission_level}{ctx_info} "
                 f"描述:{cfg.description or '无'}"
             )
         lines.append(f"\n总共: {len(self._store.agents)} 个")
@@ -344,8 +425,45 @@ class DynamicSubAgentPlugin(Star):
 
         self._spawned_ids.discard(found)
         del self._store.agents[found]
+        # 清理上下文
+        self._agent_contexts.pop(found, None)
         self._save_store()
-        return f"子 Agent [{name}] 已销毁，创建配额已归还"
+        # 清理上下文文件中的记录
+        try:
+            cp = self._context_path()
+            if os.path.exists(cp):
+                with open(cp, "r", encoding="utf-8") as f:
+                    ctx_data = json.load(f)
+                ctx_data.pop(found, None)
+                with open(cp, "w", encoding="utf-8") as f:
+                    json.dump(ctx_data, f, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+        return f"子 Agent [{name}] 已销毁（含上下文清理），创建配额已归还"
+
+    @filter.llm_tool()
+    async def clear_agent_context(
+        self,
+        event: AstrMessageEvent,
+        name: str = "",
+    ):
+        """
+        清空指定 Agent 的对话历史（不销毁 Agent 本身）。
+
+        Args:
+            name(string): 子 Agent 名称
+        """
+        if not name:
+            return "请指定子 Agent 名称"
+
+        aid = self._find_agent_by_name(name)
+        if not aid:
+            return f"未找到名为 [{name}] 的子 Agent"
+
+        old_count = len(self._agent_contexts.get(aid, []))
+        self._agent_contexts.pop(aid, None)
+        self._save_context(aid)
+        return f"子 Agent [{name}] 的 {old_count} 轮对话历史已清空"
 
     @filter.llm_tool()
     async def show_collaboration_report(self, event: AstrMessageEvent):
