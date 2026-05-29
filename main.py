@@ -5,27 +5,25 @@ import time
 import uuid
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timezone
-from typing import Any
 
 from astrbot.api.event import AstrMessageEvent, filter
 from astrbot.api.star import Context, Star, PluginKVStoreMixin, register
 from astrbot.core.agent.agent import Agent
 from astrbot.core.agent.handoff import HandoffTool
-from astrbot.core.agent.tool import ToolSet
 from astrbot.core.astr_agent_context import AstrAgentContext
 from astrbot.core.message.message_event_result import MessageChain
 from astrbot.core.provider.register import llm_tools
 from astrbot.core import logger
 
 # ══════════════════════════════════════════════
-# Constants
+# Constants (defaults — can be overridden by config)
 # ══════════════════════════════════════════════
 
 _HANDOFF_COUNT_KEY = "_dynamic_subagent_handoff_count"
 _AGENT_SPAWN_COUNT_KEY = "_dynamic_subagent_spawn_count"
-_MAX_HANDOFFS_PER_EVENT = 20
-_MAX_SPAWNS_PER_EVENT = 10
 
+_DEFAULT_MAX_HANDOFFS = 20
+_DEFAULT_MAX_SPAWNS = 10
 _DEFAULT_MAX_DEPTH = 3
 _DEFAULT_MAX_PER_EVENT = 5
 _DEFAULT_AGENT_TIMEOUT = 120.0
@@ -93,24 +91,109 @@ class SubAgentStore:
 
 
 # ──────────────────────────────────────────────
-# Permission level -> tool access mapping
+# Permission level -> tool name filtering
 # ──────────────────────────────────────────────
 
-_SAFE_FUNCTION_TOOLS = ["web_search", "send_message_to_user", "fetch_url"]
+_PERMISSION_TOOLS: dict[str, list[str] | None] = {
+    # safe: 只允许安全的只读工具
+    "safe": ["web_search", "send_message_to_user", "fetch_url"],
+    # medium: 允许所有工具
+    "medium": None,
+    # full: 允许所有工具
+    "full": None,
+}
 
 
-def _build_tool_set(tools: list[str] | None) -> ToolSet | None:
-    """根据工具白名单构建 ToolSet"""
-    if tools is None:
-        return None
-    if not tools:
-        return None
-    ts = ToolSet()
-    for name in tools:
-        ft = llm_tools.get_func(name)
-        if ft and ft.active:
-            ts.add_tool(ft)
-    return None if ts.empty() else ts
+def _resolve_tool_names(cfg: SubAgentConfig) -> list[str] | None:
+    """根据 permission_level 和 tools 参数，解析最终的工具名列表"""
+    if cfg.tools is not None:
+        return cfg.tools
+    return _PERMISSION_TOOLS.get(cfg.permission_level)
+
+
+def _build_handoff_tool(cfg: SubAgentConfig) -> HandoffTool:
+    """为子 Agent 创建 HandoffTool，正确解析工具列表"""
+    tool_names = _resolve_tool_names(cfg)
+
+    # 构建 FunctionTool 列表（从全局 llm_tools 注册表中查找）
+    tool_list = None
+    if tool_names is not None:
+        tool_list = []
+        for name in tool_names:
+            ft = llm_tools.get_func(name)
+            if ft and ft.active:
+                tool_list.append(ft)
+
+    agent = Agent[AstrAgentContext](
+        name=cfg.name,
+        instructions=cfg.system_prompt,
+        tools=tool_list,
+    )
+    handoff = HandoffTool(
+        agent=agent,
+        tool_description=f"将任务转交给 {cfg.name} 处理",
+    )
+    if cfg.provider_id:
+        handoff.provider_id = cfg.provider_id
+
+    return handoff
+
+
+# ══════════════════════════════════════════════
+# Safe HTML render (no Star mixin dependency)
+# ══════════════════════════════════════════════
+
+
+def _render_trace_to_html(trace: list[dict]) -> str:
+    """将追踪记录渲染为 HTML 片段，返回 data:image/svg+xml 或纯文本"""
+    import html as _html
+
+    parts = [
+        '<div style="font-family: \'Segoe UI\', \'Microsoft YaHei\', sans-serif; '
+        'max-width: 640px; padding: 24px; background: #fff;">',
+        '<h2 style="border-bottom: 2px solid #4A90D9; padding-bottom: 8px; '
+        'margin-top: 0; color: #333;">Sub-Agent Collaboration Report</h2>',
+    ]
+
+    for i, entry in enumerate(trace, 1):
+        status = entry.get("status", "success")
+        border_color = "#4A90D9" if status == "success" else "#E74C3C"
+        bg_color = "#F7FAFC" if status == "success" else "#FDF2F2"
+        ts = datetime.fromtimestamp(entry["timestamp"]).strftime("%H:%M:%S")
+        agent_name = _html.escape(str(entry.get("agent_name", "")))
+        task = _html.escape(entry.get("task", "''")[:200])
+        response = _html.escape(entry.get("response", "''")[:300])
+
+        parts.append(
+            f'<div style="margin: 14px 0; padding: 12px; border-radius: 6px; '
+            f'border-left: 4px solid {border_color}; background: {bg_color};">'
+            f'<div style="font-size: 12px; color: #999; margin-bottom: 4px;">'
+            f'Step {i} &middot; {agent_name} &middot; {ts}</div>'
+            f'<div style="font-size: 13px; color: #555; margin: 6px 0; line-height: 1.5;">'
+            f'<em>Task:</em> {task}</div>'
+            f'<div style="font-size: 13px; color: #333; margin: 6px 0; line-height: 1.5;">'
+            f'<em>Response:</em> {response}</div></div>'
+        )
+
+    parts.append(f"<p>Total steps: {len(trace)}</p>")
+    parts.append("</div>")
+    return "\n".join(parts)
+
+
+def _format_trace_text(trace: list[dict]) -> str:
+    """追踪报告纯文本格式"""
+    lines = ["===== Sub-Agent Collaboration Report =====\n"]
+    for i, entry in enumerate(trace, 1):
+        ts = datetime.fromtimestamp(entry["timestamp"]).strftime("%H:%M:%S")
+        label = "OK" if entry.get("status") == "success" else "ERROR"
+        lines.append(
+            f"[Step {i}] {ts} | {label}\n"
+            f"  Agent: {entry.get('agent_name', '?')}\n"
+            f"  Task: {entry['task'][:200]}\n"
+            f"  Response: {entry['response'][:300]}\n"
+        )
+    lines.append(f"\nTotal steps: {len(trace)}")
+    return "\n".join(lines)
 
 
 # ══════════════════════════════════════════════
@@ -135,12 +218,21 @@ class DynamicSubAgentPlugin(Star, PluginKVStoreMixin):
         self._model_filter_mode = self._config.get("model_filter_mode", "blacklist")
         self._allowed_models = set(self._config.get("allowed_models", []))
 
+        # 从配置读取阈值
+        self._max_handoffs = int(
+            self._config.get("max_handoffs_per_event", _DEFAULT_MAX_HANDOFFS)
+        )
+        self._max_spawns = int(
+            self._config.get("max_spawns_per_event", _DEFAULT_MAX_SPAWNS)
+        )
+        self._trace_enabled = bool(self._config.get("trace_enabled", True))
+
         # 运行时状态
         self._runtime_agents: dict[str, SubAgentConfig] = {}
         self._persist_key = "dynamic_subagent_store"
         self._store: SubAgentStore = SubAgentStore()
 
-        # 每次事件最后的 handoff 追踪
+        # handoff 追踪
         self._last_traces: dict[str, list[dict]] = {}
 
     # ── Lifecycle ──────────────────────────────
@@ -194,20 +286,9 @@ class DynamicSubAgentPlugin(Star, PluginKVStoreMixin):
 
     def _register_handoff_tool(self, cfg: SubAgentConfig):
         """为子 Agent 创建并注册 HandoffTool"""
-        tools = _build_tool_set(cfg.tools)
-        agent = Agent[AstrAgentContext](
-            name=cfg.name,
-            instructions=cfg.system_prompt,
-            tools=tools,
-        )
-        handoff = HandoffTool(
-            agent=agent,
-            tool_description=f"将任务转交给 {cfg.name}（{cfg.permission_level} 权限）处理",
-        )
-        if cfg.provider_id:
-            handoff.provider_id = cfg.provider_id
-
         self._remove_handoff_tool(cfg.tool_name)
+
+        handoff = _build_handoff_tool(cfg)
         llm_tools.func_list.append(handoff)
         logger.info(
             "DynamicSubAgent: registered %s (%s) depth=%d timeout=%.0fs",
@@ -261,7 +342,7 @@ class DynamicSubAgentPlugin(Star, PluginKVStoreMixin):
             return
 
         count = event.get_extra(_HANDOFF_COUNT_KEY, 0)
-        if count >= _MAX_HANDOFFS_PER_EVENT:
+        if count >= self._max_handoffs:
             tools = getattr(request.func_tool, "tools", None)
             if isinstance(tools, list):
                 request.func_tool.tools = [
@@ -271,7 +352,7 @@ class DynamicSubAgentPlugin(Star, PluginKVStoreMixin):
                     "DynamicSubAgent: handoff circuit breaker triggered "
                     "(%d/%d), HandoffTools removed",
                     count,
-                    _MAX_HANDOFFS_PER_EVENT,
+                    self._max_handoffs,
                 )
 
     def _count_handoff(self, event: AstrMessageEvent) -> int:
@@ -297,13 +378,15 @@ class DynamicSubAgentPlugin(Star, PluginKVStoreMixin):
         status: str = "success",
     ):
         """记录一次 handoff 调用到追踪列表"""
+        if not self._trace_enabled:
+            return
         umo = event.unified_msg_origin
         traces = self._last_traces.get(umo, [])
         traces.append(
             {
                 "agent_name": agent_name,
-                "task": task[:500],
-                "response": response[:500],
+                "task": str(task)[:500],
+                "response": str(response)[:500],
                 "status": status,
                 "timestamp": time.time(),
             }
@@ -371,10 +454,7 @@ class DynamicSubAgentPlugin(Star, PluginKVStoreMixin):
                 if err:
                     return {"status": "error", "message": err}
                 if cfg.provider_id and not self._is_model_allowed(cfg.provider_id):
-                    return {
-                        "status": "error",
-                        "message": f"模型 {cfg.provider_id} 被禁止",
-                    }
+                    return {"status": "error", "message": f"模型 {cfg.provider_id} 被禁止"}
                 self._register_handoff_tool(cfg)
                 if cfg.lifecycle == "persistent":
                     self._store.agents[cfg.agent_id] = cfg
@@ -402,10 +482,7 @@ class DynamicSubAgentPlugin(Star, PluginKVStoreMixin):
                     self._remove_handoff_tool(cfg.tool_name)
                     del self._store.agents[agent_id]
                     self._save_store()
-                    return {
-                        "status": "ok",
-                        "message": f"持久化子 Agent {cfg.name} 已销毁",
-                    }
+                    return {"status": "ok", "message": f"持久化子 Agent {cfg.name} 已销毁"}
                 return {"status": "error", "message": "未找到该子 Agent"}
 
             async def trace_api():
@@ -423,10 +500,7 @@ class DynamicSubAgentPlugin(Star, PluginKVStoreMixin):
                 "/plugin/subagent/delete", delete_api, ["POST"], "删除子 Agent"
             )
             ctx.register_web_api(
-                "/plugin/subagent/trace",
-                trace_api,
-                ["GET"],
-                "获取协作追踪记录",
+                "/plugin/subagent/trace", trace_api, ["GET"], "获取协作追踪记录"
             )
             logger.info("DynamicSubAgent: registered 4 WebUI API routes")
         except Exception as e:
@@ -465,12 +539,11 @@ class DynamicSubAgentPlugin(Star, PluginKVStoreMixin):
             max_per_event(int): 单次对话中该子 Agent 最大创建次数 (1-50)
             timeout(float): 子 Agent 超时时间，秒 (5-600)
         """
-        # 全局 spawn 熔断
         spawn_count = self._count_spawn(event)
-        if spawn_count > _MAX_SPAWNS_PER_EVENT:
+        if spawn_count > self._max_spawns:
             return (
                 f"[AGENT_ERROR] 本对话中已创建 {spawn_count - 1} 个子 Agent "
-                f"(上限: {_MAX_SPAWNS_PER_EVENT})，请使用已有 Agent 或删除不再需要的。"
+                f"(上限: {self._max_spawns})，请使用已有 Agent 或删除不再需要的。"
             )
 
         cfg = SubAgentConfig(
@@ -582,80 +655,20 @@ class DynamicSubAgentPlugin(Star, PluginKVStoreMixin):
         if not trace:
             return "本次对话中尚无子 Agent 协作记录。"
 
+        html = _render_trace_to_html(trace)
+
         try:
-            rendered = await self._render_trace_image(trace)
-            await event.send(MessageChain().url_image(rendered))
+            # 尝试用 Star 的 html_render（需要 PluginHTMLRenderMixin）
+            if hasattr(self, "html_render"):
+                rendered = await self.html_render(
+                    html, {}, return_url=True  # type: ignore
+                )
+                await event.send(MessageChain().url_image(rendered))
+            else:
+                # fallback: 直接发纯文本
+                await event.send(MessageChain().message(_format_trace_text(trace)))
         except Exception:
-            text = self._format_trace_text(trace)
+            text = _format_trace_text(trace)
             await event.send(MessageChain().message(text))
+
         return "协作报告已发送给用户。"
-
-    # ── Trace rendering ────────────────────────
-
-    async def _render_trace_image(self, trace: list[dict]) -> str:
-        """HTML 模板渲染追踪报告为图片"""
-        import html as _html
-
-        prepared = []
-        for entry in trace:
-            prepared.append(
-                {
-                    **entry,
-                    "time_str": datetime.fromtimestamp(entry["timestamp"]).strftime(
-                        "%H:%M:%S"
-                    ),
-                    "agent_name": _html.escape(str(entry.get("agent_name", ""))),
-                    "task_short": (
-                        _html.escape(entry["task"][:200]) + "..."
-                        if len(entry["task"]) > 200
-                        else _html.escape(entry["task"])
-                    ),
-                    "response_short": (
-                        _html.escape(entry["response"][:300]) + "..."
-                        if len(entry["response"]) > 300
-                        else _html.escape(entry["response"])
-                    ),
-                }
-            )
-
-        template = """\
-<div style="font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; \
-max-width: 640px; padding: 24px; background: #fff;">
-  <h2 style="border-bottom: 2px solid #4A90D9; padding-bottom: 8px; \
-margin-top: 0; color: #333;">
-    Sub-Agent Collaboration Report
-  </h2>
-  {% for entry in trace %}
-  <div style="margin: 14px 0; padding: 12px; border-radius: 6px; \
-border-left: 4px solid {{ '#4A90D9' if entry.status == 'success' else '#E74C3C' }}; \
-background: {{ '#F7FAFC' if entry.status == 'success' else '#FDF2F2' }};">
-    <div style="font-size: 12px; color: #999; margin-bottom: 4px;">
-      Step {{ loop.index }} &middot; {{ entry.agent_name }} &middot; {{ entry.time_str }}
-    </div>
-    <div style="font-size: 13px; color: #555; margin: 6px 0; line-height: 1.5;">
-      <em>Task:</em> {{ entry.task_short }}
-    </div>
-    <div style="font-size: 13px; color: #333; margin: 6px 0; line-height: 1.5;">
-      <em>Response:</em> {{ entry.response_short }}
-    </div>
-  </div>
-  {% endfor %}
-</div>"""
-
-        return await self.html_render(template, {"trace": prepared}, return_url=True)
-
-    @staticmethod
-    def _format_trace_text(trace: list[dict]) -> str:
-        """追踪报告纯文本 fallback"""
-        lines = ["===== Sub-Agent Collaboration Report =====\n"]
-        for i, entry in enumerate(trace, 1):
-            ts = datetime.fromtimestamp(entry["timestamp"]).strftime("%H:%M:%S")
-            status = "OK" if entry.get("status", "success") == "success" else "ERROR"
-            lines.append(
-                f"[Step {i}] {ts} | {status}\n"
-                f"  Agent: {entry.get('agent_name', '?')}\n"
-                f"  Task: {entry['task'][:200]}\n"
-                f"  Response: {entry['response'][:300]}\n"
-            )
-        lines.append(f"\nTotal steps: {len(trace)}")
-        return "\n".join(lines)
