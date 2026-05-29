@@ -177,7 +177,7 @@ class DynamicSubAgentPlugin(Star):
         # 主 Agent 调用：full 权限
         return "full"
 
-        def _build_sub_tools(self, permission_level: str) -> ToolSet:
+    def _build_sub_tools(self, permission_level: str) -> ToolSet:
         sub_tools = ToolSet()
         full_mgr = self.context.provider_manager.llm_tools
         
