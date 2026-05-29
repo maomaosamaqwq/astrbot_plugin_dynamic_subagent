@@ -168,6 +168,11 @@ class DynamicSubAgentPlugin(Star):
     def _build_sub_tools(self, permission_level: str) -> ToolSet:
         sub_tools = ToolSet()
         full_mgr = self.context.provider_manager.llm_tools
+        
+        # 调试：打印所有可用工具名
+        tool_names = [t.name for t in full_mgr.func_list]
+        logger.info(f"DynamicSubAgent: 可用工具列表 ({len(tool_names)}个): {tool_names}")
+        
         if permission_level == "safe":
             for t in full_mgr.func_list:
                 if t.name in _SAFE_TOOLS:
@@ -179,6 +184,10 @@ class DynamicSubAgentPlugin(Star):
         else:
             for t in full_mgr.func_list:
                 sub_tools.add_tool(t)
+        
+        selected_names = [t.name for t in sub_tools.func_list]
+        logger.info(f"DynamicSubAgent: [{permission_level}] 已选工具 ({len(selected_names)}个): {selected_names}")
+        
         return sub_tools
 
     async def _execute_sub_agent(self, event: AstrMessageEvent, cfg: SubAgentConfig, task: str) -> str:
