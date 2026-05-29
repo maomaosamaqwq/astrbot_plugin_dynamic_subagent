@@ -208,6 +208,15 @@ class DynamicSubAgentPlugin(Star):
             for t in builtin_tools:
                 sub_tools.add_tool(t)
         
+        # 限制子 Agent 再创建子 Agent 的深度（主 Agent 可正常 spawn）
+        caller_depth = getattr(event, '_sub_agent_depth', 0)
+        if caller_depth >= 3:
+            # 深度 >= 3，移除 spawn/delete/clear 工具
+            spawn_ban = {"spawn_agent", "delete_agent", "clear_agent_context", "show_collaboration_report"}
+            sub_tools.func_list = [t for t in sub_tools.func_list if t.name not in spawn_ban]
+            if "spawn_agent" in [t.name for t in sub_tools.func_list]:
+                logger.info(f"DynamicSubAgent: 子 Agent 深度已达 {caller_depth}，移除创建/销毁工具")
+        
         selected_names = [t.name for t in sub_tools.func_list]
         logger.info(f"DynamicSubAgent: [{permission_level}] 已选工具 ({len(selected_names)}个): {selected_names}")
         
@@ -237,6 +246,11 @@ class DynamicSubAgentPlugin(Star):
 
         system_parts.append("请根据任务使用合适的工具完成工作。")
         system_prompt = "\n\n".join(system_parts)
+
+        # 标记子 Agent 嵌套深度，用于 spawn_agent 深度限制
+        depth = getattr(event, '_sub_agent_depth', 0) + 1
+        setattr(event, '_sub_agent_depth', depth)
+        logger.info(f"DynamicSubAgent: [{cfg.name}] 执行深度={depth}")
 
         llm_resp = await self.context.tool_loop_agent(
             event=event,
@@ -312,6 +326,11 @@ class DynamicSubAgentPlugin(Star):
         perm_rank = {"safe": 0, "medium": 1, "full": 2}
         if perm_rank.get(permission_level, 0) > perm_rank.get(caller_perm, 0):
             return f"权限不足：无法创建 {permission_level} 权限的子 Agent（当前权限: {caller_perm}）"
+
+        # 深度限制：子 Agent 最多嵌套 3 层
+        caller_depth = getattr(event, '_sub_agent_depth', 0)
+        if caller_depth >= 3:
+            return f"子 Agent 嵌套深度已达上限（{caller_depth}），无法再创建新的子 Agent"
 
         if self._find_agent_by_name(name):
             return f"已有同名子 Agent [{name}]，请使用不同的名称"
