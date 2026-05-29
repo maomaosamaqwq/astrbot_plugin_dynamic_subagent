@@ -18,7 +18,7 @@
   },
   "max_handoffs_per_event": {
     "type": "int",
-    "description": "单次对话中 handoff 转交次数上限，超过后自动熔断防止死循环",
+    "description": "单次对话中 handoff 转交次数上限",
     "default": 20
   },
   "max_spawns_per_event": {
@@ -26,15 +26,10 @@
     "description": "单次对话中最多可创建的子 Agent 数量",
     "default": 10
   },
-  "default_max_depth": {
+  "max_context_turns": {
     "type": "int",
-    "description": "子 Agent 默认的最大嵌套深度（1-10）",
-    "default": 3
-  },
-  "default_timeout": {
-    "type": "float",
-    "description": "子 Agent 默认超时时间（秒，5-600）",
-    "default": 120.0
+    "description": "每个 Agent 保留的最大对话历史轮数",
+    "default": 20
   },
   "trace_enabled": {
     "type": "bool",

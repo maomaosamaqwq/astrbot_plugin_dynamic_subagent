@@ -1,6 +1,6 @@
 name: dynamic_subagent
 author: maomaosamaqwq
-version: 0.6.0
+version: 0.6.1
 description: 让 AI 可以通过 tool call 动态创建和管理子 Agent
 repo: https://github.com/maomaosamaqwq/astrbot_plugin_dynamic_subagent
 
@@ -29,14 +29,10 @@ config:
     type: int
     default: 10
     description: 单次对话中最多可创建的子 Agent 数量
-  default_max_depth:
+  max_context_turns:
     type: int
-    default: 3
-    description: 子 Agent 默认的最大嵌套深度（1-10）
-  default_timeout:
-    type: float
-    default: 120.0
-    description: 子 Agent 默认超时时间（秒，5-600）
+    default: 20
+    description: 每个 Agent 保留的最大对话历史轮数（注入到 system prompt）
   trace_enabled:
     type: bool
     default: true

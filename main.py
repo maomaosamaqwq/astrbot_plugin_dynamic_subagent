@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import os
-import time
 import uuid
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timezone
@@ -30,33 +29,41 @@ class SubAgentConfig:
 class SubAgentStore:
     agents: dict = field(default_factory=dict)
 
-# ── Permission mapping ──
+# ── Constants ──
 
-_PERMISSION_TOOLS = {
-    "safe": None,
-    "medium": None,
-    "full": None,
-}
+_VALID_PERMISSIONS = {"safe", "medium", "full"}
 
-# ── Safety Limits ──
+# safe 权限允许的工具白名单
+_SAFE_TOOLS = frozenset({
+    "astrbot_web_search", "brave_web_search", "tavily_web_search", "bocha_web_search",
+    "spawn_agent", "list_agents", "get_sub_agent_results",
+})
 
-_MAX_SPAWN = 10
-_MAX_TRACE = 50
-# 上下文历史最大轮数（防止 system prompt 过长）
-_MAX_CONTEXT_TURNS = 20
+# medium 权限排除的工具黑名单
+_MEDIUM_BLOCKED = frozenset({
+    "shell_exec", "local_python_exec", "execute_shell", "run_python",
+})
 
 
-@register(name="dynamic_subagent", desc="让 AI 动态创建和管理子 Agent", author="maomaosamaqwq", version="0.6.0")
+@register(name="dynamic_subagent", desc="让 AI 动态创建和管理子 Agent", author="maomaosamaqwq", version="0.6.1")
 class DynamicSubAgentPlugin(Star):
     def __init__(self, context: Context, config: dict = None):
         super().__init__(context)
-        self._ctx = context
         self._cfg = config or {}
+
+        # 从配置读取参数，带默认值
+        self._max_spawn: int = int(self._cfg.get("max_spawns_per_event", 10))
+        self._max_handoffs: int = int(self._cfg.get("max_handoffs_per_event", 20))
+        self._max_context_turns: int = int(self._cfg.get("max_context_turns", 20))
+        self._trace_enabled: bool = bool(self._cfg.get("trace_enabled", True))
+        self._model_blacklist: list[str] = self._cfg.get("model_blacklist", [])
+        self._model_filter_mode: str = self._cfg.get("model_filter_mode", "blacklist")
+        self._allowed_models: list[str] = self._cfg.get("allowed_models", [])
+
         self._store = SubAgentStore()
         self._spawned_ids: set[str] = set()
         self._traces: dict[str, list[dict]] = {}
         self._sub_results: dict[str, list[dict]] = {}
-        # Bug #2 fix: 每个 Agent 的会话历史（内存）
         self._agent_contexts: dict[str, list[dict]] = {}
 
         self._load_store()
@@ -64,10 +71,9 @@ class DynamicSubAgentPlugin(Star):
     # ── Lifecycle ──
 
     async def initialize(self):
-        logger.info("DynamicSubAgent v0.6.0 已初始化")
+        logger.info("DynamicSubAgent v0.6.1 已初始化")
 
     async def terminate(self):
-        # 退出时保存所有 persistent agent 的上下文
         self._save_all_contexts()
         logger.info("DynamicSubAgent 已停止")
 
@@ -96,7 +102,6 @@ class DynamicSubAgentPlugin(Star):
         except Exception as e:
             logger.warning(f"DynamicSubAgent: 加载持久化失败: {e}")
 
-        # 加载 persistent agent 的上下文历史
         try:
             cp = self._context_path()
             if os.path.exists(cp):
@@ -115,31 +120,30 @@ class DynamicSubAgentPlugin(Star):
             logger.error(f"DynamicSubAgent: 保存持久化失败: {e}")
 
     def _save_context(self, agent_id: str):
-        """保存单个 Agent 的上下文到文件"""
+        """保存单个 Agent 的上下文到文件（增量写入）"""
         try:
             cp = self._context_path()
-            # 加载现有
             existing = {}
             if os.path.exists(cp):
                 with open(cp, "r", encoding="utf-8") as f:
                     existing = json.load(f)
             if agent_id in self._agent_contexts:
                 existing[agent_id] = self._agent_contexts[agent_id]
+            else:
+                existing.pop(agent_id, None)
             with open(cp, "w", encoding="utf-8") as f:
                 json.dump(existing, f, ensure_ascii=False, indent=2)
         except Exception as e:
             logger.error(f"DynamicSubAgent: 保存上下文失败: {e}")
 
     def _save_all_contexts(self):
-        """保存所有 Agent 上下文到文件"""
         try:
-            cp = self._context_path()
-            with open(cp, "w", encoding="utf-8") as f:
+            with open(self._context_path(), "w", encoding="utf-8") as f:
                 json.dump(self._agent_contexts, f, ensure_ascii=False, indent=2)
         except Exception as e:
             logger.error(f"DynamicSubAgent: 保存全部上下文失败: {e}")
 
-    # ── Helper: 查找 agent ──
+    # ── Helpers ──
 
     def _find_agent_by_name(self, name: str) -> str | None:
         for aid, cfg in self._store.agents.items():
@@ -147,25 +151,34 @@ class DynamicSubAgentPlugin(Star):
                 return aid
         return None
 
-    # ── Helper: 构建子 Agent 工具集 ──
+    def _check_model_allowed(self, model: str) -> bool:
+        """检查模型是否被允许使用"""
+        if not model:
+            return True
+        if self._model_filter_mode == "whitelist":
+            return model in self._allowed_models
+        return model not in self._model_blacklist
+
+    def _trace(self, umo: str, entry: dict):
+        """记录追踪（如果启用）"""
+        if self._trace_enabled:
+            self._traces.setdefault(umo, []).append(entry)
 
     def _build_sub_tools(self, permission_level: str) -> ToolSet:
         sub_tools = ToolSet()
         full_mgr = self.context.provider_manager.llm_tools
         if permission_level == "safe":
             for t in full_mgr.func_list:
-                if t.name in ("astrbot_web_search", "brave_web_search", "tavily_web_search", "bocha_web_search", "spawn_agent", "list_agents"):
+                if t.name in _SAFE_TOOLS:
                     sub_tools.add_tool(t)
         elif permission_level == "medium":
             for t in full_mgr.func_list:
-                if t.name not in ("shell_exec", "local_python_exec", "execute_shell", "run_python"):
+                if t.name not in _MEDIUM_BLOCKED:
                     sub_tools.add_tool(t)
         else:
             for t in full_mgr.func_list:
                 sub_tools.add_tool(t)
         return sub_tools
-
-    # ── Helper: 执行子 Agent 任务 ──
 
     async def _execute_sub_agent(self, event: AstrMessageEvent, cfg: SubAgentConfig, task: str) -> str:
         prov_id = cfg.provider_id or await self.context.get_current_chat_provider_id(
@@ -173,23 +186,19 @@ class DynamicSubAgentPlugin(Star):
         )
         sub_tools = self._build_sub_tools(cfg.permission_level)
 
-        # ── 构建 system prompt，注入上下文历史 ──
+        # 构建 system prompt，注入上下文历史
         system_parts = [
             f"你是子 Agent [{cfg.name}]。",
             f"描述: {cfg.description}",
             f"指令: {cfg.instruction}",
         ]
 
-        # 注入历史上下文（如果有）
         ctx_history = self._agent_contexts.get(cfg.id, [])
         if ctx_history:
             history_lines = ["以下是你之前的对话历史，请参考上下文回答："]
             for i, turn in enumerate(ctx_history, 1):
+                result_preview = turn['result'][:500] + ("..." if len(turn['result']) > 500 else "")
                 history_lines.append(f"[轮次 {i}] 任务: {turn['task']}")
-                # 截断过长的结果，只保留前 500 字符
-                result_preview = turn['result'][:500]
-                if len(turn['result']) > 500:
-                    result_preview += "..."
                 history_lines.append(f"[轮次 {i}] 结果: {result_preview}")
             system_parts.append("\n".join(history_lines))
 
@@ -205,7 +214,7 @@ class DynamicSubAgentPlugin(Star):
         )
         result_text = llm_resp.completion_text if llm_resp else "(无返回结果)"
 
-        # ── 保存到上下文历史 ──
+        # 保存到上下文历史
         if cfg.id not in self._agent_contexts:
             self._agent_contexts[cfg.id] = []
         self._agent_contexts[cfg.id].append({
@@ -214,10 +223,10 @@ class DynamicSubAgentPlugin(Star):
             "timestamp": datetime.now(timezone.utc).isoformat(),
         })
         # 截断过长历史
-        if len(self._agent_contexts[cfg.id]) > _MAX_CONTEXT_TURNS:
-            self._agent_contexts[cfg.id] = self._agent_contexts[cfg.id][-_MAX_CONTEXT_TURNS:]
+        if len(self._agent_contexts[cfg.id]) > self._max_context_turns:
+            self._agent_contexts[cfg.id] = self._agent_contexts[cfg.id][-self._max_context_turns:]
 
-        # persistent agent 的上下文持久化到文件
+        # persistent agent 持久化上下文
         if cfg.id in self._store.agents:
             self._save_context(cfg.id)
 
@@ -245,7 +254,6 @@ class DynamicSubAgentPlugin(Star):
         如果不传 task，则仅注册，后续可通过 transfer_to_agent(name="xxx", task="...") 调用。
 
         persistent=true 时，Agent 的对话历史会跨调用保留。
-        下次 transfer_to_agent 调用时，Agent 能记住之前的任务和结果。
 
         Args:
             name(string): 子 Agent 名称（英文/数字/下划线，用作标识）
@@ -257,13 +265,13 @@ class DynamicSubAgentPlugin(Star):
             model(string): 使用的模型名，不传则继承主 Agent
             persistent(boolean): 是否持久化（跨重启 + 上下文保留），默认 false
         """
-        if len(self._spawned_ids) >= _MAX_SPAWN:
-            return f"已达到子 Agent 创建上限（{_MAX_SPAWN}），无法创建"
+        if len(self._spawned_ids) >= self._max_spawn:
+            return f"已达到子 Agent 创建上限（{self._max_spawn}），无法创建"
 
         if not name or not name.isidentifier():
             return "name 必须是合法标识符（英文/数字/下划线，不能以数字开头）"
 
-        if permission_level not in _PERMISSION_TOOLS:
+        if permission_level not in _VALID_PERMISSIONS:
             return "permission_level 必须为 safe/medium/full"
 
         if self._find_agent_by_name(name):
@@ -271,6 +279,10 @@ class DynamicSubAgentPlugin(Star):
 
         if isinstance(persistent, str):
             persistent = persistent.lower() in ("true", "1", "yes")
+
+        # 模型过滤
+        if model and not self._check_model_allowed(model):
+            return f"模型 [{model}] 不在允许范围内（过滤模式: {self._model_filter_mode}）"
 
         agent_id = uuid.uuid4().hex[:12]
         now = time.time()
@@ -287,18 +299,17 @@ class DynamicSubAgentPlugin(Star):
         if persistent:
             self._save_store()
 
-        self._traces.setdefault(event.unified_msg_origin, []).append({
+        self._trace(event.unified_msg_origin, {
             "agent_name": name, "agent_id": agent_id,
             "action": "spawn", "task": task or "(无任务)",
             "status": "created",
             "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S"),
         })
 
-        # ── 如果有 task，立即执行 ──
         if task:
             try:
                 result_text = await self._execute_sub_agent(event, cfg, task)
-                self._traces[event.unified_msg_origin][-1]["status"] = "completed"
+                self._traces.get(event.unified_msg_origin, [{}])[-1]["status"] = "completed"
                 self._sub_results.setdefault(event.unified_msg_origin, []).append({
                     "agent_name": name, "agent_id": agent_id,
                     "task": task, "result": result_text,
@@ -311,7 +322,8 @@ class DynamicSubAgentPlugin(Star):
                 )
             except Exception as e:
                 logger.error(f"DynamicSubAgent: 子 Agent [{name}] 执行任务失败: {e}")
-                self._traces[event.unified_msg_origin][-1]["status"] = f"failed: {e}"
+                if self._traces.get(event.unified_msg_origin):
+                    self._traces[event.unified_msg_origin][-1]["status"] = f"failed: {e}"
                 return (
                     f"子 Agent [{name}] 创建成功，但执行任务时出错: {e}\n"
                     f"可通过 transfer_to_agent(name=\"{name}\", task=\"...\") 重新尝试。"
@@ -335,8 +347,7 @@ class DynamicSubAgentPlugin(Star):
         """
         将任务转交给已创建的子 Agent 执行。
 
-        对于 persistent Agent，会自动注入之前的对话历史作为上下文，
-        Agent 能记住之前的任务和结果。
+        对于 persistent Agent，会自动注入之前的对话历史作为上下文。
 
         Args:
             name(string): 子 Agent 名称（需与 spawn_agent 时的 name 一致）
@@ -355,7 +366,7 @@ class DynamicSubAgentPlugin(Star):
 
         cfg = self._store.agents[aid]
 
-        self._traces.setdefault(event.unified_msg_origin, []).append({
+        self._trace(event.unified_msg_origin, {
             "agent_name": name, "agent_id": cfg.id,
             "action": "transfer", "task": task,
             "status": "running",
@@ -365,14 +376,14 @@ class DynamicSubAgentPlugin(Star):
         try:
             result_text = await self._execute_sub_agent(event, cfg, task)
 
-            self._traces[event.unified_msg_origin][-1]["status"] = "completed"
+            if self._traces.get(event.unified_msg_origin):
+                self._traces[event.unified_msg_origin][-1]["status"] = "completed"
             self._sub_results.setdefault(event.unified_msg_origin, []).append({
                 "agent_name": name, "agent_id": cfg.id,
                 "task": task, "result": result_text,
                 "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S"),
             })
 
-            # 提示 Agent 是否有历史上下文
             ctx_count = len(self._agent_contexts.get(cfg.id, []))
             ctx_hint = f"\n（Agent 已有 {ctx_count} 轮历史上下文）" if ctx_count > 1 else ""
 
@@ -383,7 +394,8 @@ class DynamicSubAgentPlugin(Star):
             )
         except Exception as e:
             logger.error(f"DynamicSubAgent: transfer_to_agent({name}) 执行失败: {e}")
-            self._traces[event.unified_msg_origin][-1]["status"] = f"failed: {e}"
+            if self._traces.get(event.unified_msg_origin):
+                self._traces[event.unified_msg_origin][-1]["status"] = f"failed: {e}"
             return f"子 Agent [{name}] 执行任务时出错: {e}"
 
     @filter.llm_tool()
@@ -411,7 +423,7 @@ class DynamicSubAgentPlugin(Star):
         name: str = "",
     ):
         """
-        销毁指定的子 Agent。
+        销毁指定的子 Agent，同时清理其上下文历史。
 
         Args:
             name(string): 要销毁的子 Agent 名称
@@ -425,20 +437,9 @@ class DynamicSubAgentPlugin(Star):
 
         self._spawned_ids.discard(found)
         del self._store.agents[found]
-        # 清理上下文
         self._agent_contexts.pop(found, None)
         self._save_store()
-        # 清理上下文文件中的记录
-        try:
-            cp = self._context_path()
-            if os.path.exists(cp):
-                with open(cp, "r", encoding="utf-8") as f:
-                    ctx_data = json.load(f)
-                ctx_data.pop(found, None)
-                with open(cp, "w", encoding="utf-8") as f:
-                    json.dump(ctx_data, f, ensure_ascii=False, indent=2)
-        except Exception:
-            pass
+        self._save_context(found)
         return f"子 Agent [{name}] 已销毁（含上下文清理），创建配额已归还"
 
     @filter.llm_tool()
@@ -468,6 +469,9 @@ class DynamicSubAgentPlugin(Star):
     @filter.llm_tool()
     async def show_collaboration_report(self, event: AstrMessageEvent):
         """查看当前会话的子 Agent 协作追踪报告。"""
+        if not self._trace_enabled:
+            return "协作追踪已禁用（配置 trace_enabled=false）"
+
         umo = event.unified_msg_origin
         traces = self._traces.get(umo, [])
 
