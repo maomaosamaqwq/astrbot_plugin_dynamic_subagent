@@ -1,6 +1,6 @@
-# Čeština Úvod
+# Czech — Dynamic SubAgent
 
-OpenClaw je open-source platforma pro AI asistenty, která se připojuje k různým komunikačním kanálům, jako jsou Telegram, Discord a WhatsApp. Podporuje několik AI modelů a může využívat různé nástroje a dovednosti k plnění úkolů. Poháněna komunitou, OpenClaw vítá příspěvky od všech, kteří si chtějí vytvořit vlastního inteligentního asistenta.
+Dynamic SubAgent je plugin AstrBot, který umožňuje hlavnímu agentovi dynamicky vytvářet a spravovat podagenty. Nabízí tři úrovně izolace oprávnění (safe/medium/full) a omezení hloubky vnoření, podagenti nemohou vytvářet další podagenty, čímž je zajištěna bezpečnost systému. Podporuje trvalou paměť, předávání úkolů a sledování spolupráce.
 
 ---
-*This introduction is written in Čeština (Czech).*
+*This introduction is written in Czech (Czech).*

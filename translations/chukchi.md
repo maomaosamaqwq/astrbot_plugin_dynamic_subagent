@@ -1,6 +1,6 @@
-# Chukchi (Ԓыгъоравэтльэн) — Dynamic SubAgent
+# Chukchi — Dynamic SubAgent
 
-Dynamic SubAgent AstrBot plugin, agente sub-agent чыкча. Чыкча чыкча (safe/medium/full) чыкча, sub-agent чыкча sub-agent чыкча. Чыкча чыкча, чыкча чыкча, чыкча чыкча чыкча.
+Dynamic SubAgent — это плагин AstrBot, который позволяет главному агенту динамически создавать и управлять под-агентами. Имеет три уровня изоляции разрешений (safe/medium/full) и ограничение глубины вложенности, под-агенты не могут создавать других под-агентов, обеспечивая безопасность системы. Поддерживает постоянную память, передачу задач и отслеживание сотрудничества.
 
 ---
 *This introduction is written in Chukchi (Chukchi).*

@@ -1,6 +1,6 @@
-# Secoya (Paikoka) — Dynamic SubAgent
+# Secoya — Dynamic SubAgent
 
-Dynamic SubAgent AstrBot plugin, agente sub-agent tai. Tai tai (safe/medium/full) tai, sub-agent tai tai mai. Tai tai, tai tai, tai tai tai.
+Dynamic SubAgent hue AstrBot plugin carai, secador agente principal carai sub-agentes creadores manejo dinámico. Tres niveles aislamiento permisos (safe/medium/full) cha limite profundidad anidamiento, sub-agentes no puedan crear otros sub-agentes, sistema seguridad garantizada. Soporte memoria persistente, transferencia tareas cha seguimiento colaboración.
 
 ---
 *This introduction is written in Secoya (Secoya).*

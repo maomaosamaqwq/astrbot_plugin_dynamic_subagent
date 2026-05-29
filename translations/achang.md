@@ -1,6 +1,6 @@
-# 阿昌语 — Dynamic SubAgent
+# Achang — Dynamic SubAgent
 
-Dynamic SubAgent nga AstrBot plugin jā, mā Agent qo sub Agent jhō jhō kō mā hō nā. Sō pō tsō pō (safe/medium/full) tā pō nap, sub Agent nga shō sub Agent mā kō, system hō pō. Jhō jhō ingāp, jhā jhō qo jhō tsō.
+Dynamic SubAgent 是 AstrBot 的一个插件，允许主 Agent 动态创建和管理子 Agent。具备三级权限隔离（safe/medium/full）和嵌套深度限制，子 Agent 无法再创建子 Agent，确保系统安全。支持持久化记忆、任务移交和协作追踪。
 
 ---
-*This introduction is written in 阿昌语 (Achang).*
+*This introduction is written in Achang (Achang).*

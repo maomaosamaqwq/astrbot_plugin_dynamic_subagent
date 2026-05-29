@@ -1,6 +1,6 @@
-# Basque — Dynamic SubAgent
+# Basque2 — Dynamic SubAgent
 
-Dynamic SubAgent AstrBot plugin bat da, agente nagusiak azpi-agenteak sortu eta kudeatzeko aukera ematen duena. Hiru segurtasun-maila ditu (safe/medium/full) eta sakonera-muga bat, azpi-agenteek ezin dute beste azpi-agenterik sortu sistema seguru mantentzeko. Memoria iraunkorra, zereginen transferentzia eta lankidetzaren jarraipena onartzen ditu.
+Dynamic SubAgent AstrBot plugin bat da, agente nagusiari azpi-agenteak dinamikoki sortu eta kudeatzeko aukera ematen diona. Baimen isolamendu hiru maila ditu (safe/medium/full) eta habiaratze sakonera mugak, azpi-agenteek ezin dute beste azpi-agenteik sortu, sistemaren segurtasuna bermatuz. Memoria iraunkorra, ataza transferentzia eta lankidetza jarraipena onartzen ditu.
 
 ---
-*This introduction is written in Basque (Basque).*
+*This introduction is written in Basque2 (Basque).*

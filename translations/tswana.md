@@ -1,6 +1,6 @@
-# Setswana Matseno
+# Setswana — Dynamic SubAgent
 
-OpenClaw ke sethala se bulehileng sa mothusi wa AI se golaganang le dikanale tsa molaetsa tse di farologaneng jaaka Telegram, Discord le WhatsApp. E tshegetsa mefuta e mentsi ya AI mme e ka dirisa didirisiwa le bokgoni jo bo farologaneng go dira ditiro. E eteletswe pele ke setšhaba, OpenClaw e amogela dikabelo go tswa go mongwe le mongwe yo o batlang go aga mothusi wa gagwe yo o botlhale.
+Dynamic SubAgent ke plugin ya AstrBot e e letileng agent kgolo go dira le go laola sub-agent ka tsela e e fetogang. E maemo a mararo a kgaoganyo ya tumelelo (safe/medium/full) le mothaladi wa botebo, sub-agent ga e kgone go dira sub-agent tse dingwe, e netefatsa polokego ya tsamaiso. E tshegetsa kgopolo e e sa feleleng, phetiso ya tiro le tlhabololo ya tshwaragano.
 
 ---
 *This introduction is written in Setswana (Tswana).*

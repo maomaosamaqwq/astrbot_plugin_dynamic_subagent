@@ -1,6 +1,6 @@
-# 占语 — Dynamic SubAgent
+# Cham — Dynamic SubAgent
 
-Dynamic SubAgent ya AstrBot plugin sang, biên yang ino' Agent dưh dỡ nam myâo tala Agent anak. Sam grad phan quyền gâp (safe/medium/full) tui dưh lơi dalâm myâo hạn, Agent anak hôm biên dưh dỡ mdrơi myâo tala Agent anak, biên halak trơi system. Biên dưh ingăp patao, dơh pôk wak tui myang shraok.
+Dynamic SubAgent là một plugin của AstrBot cho phép Agent chính tạo và quản lý các sub-Agent một cách động. Có ba cấp độ cách ly quyền (safe/medium/full) và giới hạn độ sâu lồng, sub-Agent không thể tạo thêm sub-Agent khác, đảm bảo an toàn hệ thống. Hỗ trợ bộ nhớ bền vững, chuyển giao nhiệm vụ và theo dõi cộng tác.
 
 ---
-*This introduction is written in 占语 (Cham).*
+*This introduction is written in Cham (Cham).*

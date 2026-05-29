@@ -1,6 +1,6 @@
-# Azərbaycan dili Tanıtım
+# Azerbaijani — Dynamic SubAgent
 
-OpenClaw açıq mənbəli AI köməkçi platformasıdır, Telegram, Discord və WhatsApp kimi müxtəlif mesajlaşma kanallarına qoşulur. O, bir neçə AI modelini dəstəkləyir və tapşırıqları yerinə yetirmək üçün müxtəlif alət və bacarıqlardan istifadə edə bilər. İcma tərəfindən idarə olunan OpenClaw öz ağıllı köməkçisini qurmaq istəyən hər kəsin töhfəsini alqışlayır.
+Dynamic SubAgent, AstrBot-un əlavəsidir və əsas Agent-ə sub-agentləri dinamik şəkildə yaratmağa və idarə etməyə imkan verir. Üç səviyyəli icazə izolyasiyası (safe/medium/full) və yuvalanma dərinliyi məhdudiyyəti var, sub-agentlər başqa sub-agentlər yarada bilməz, sistemin təhlükəsizliyini təmin edir. Davamlı yaddaş, tapşırıq təhvil və əməkdaşlıq izləməni dəstəkləyir.
 
 ---
-*This introduction is written in Azərbaycan dili (Azerbaijani).*
+*This introduction is written in Azerbaijani (Azerbaijani).*

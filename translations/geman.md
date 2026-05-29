@@ -1,6 +1,6 @@
-# 格曼语 — Dynamic SubAgent
+# Geman — Dynamic SubAgent
 
-Dynamic SubAgent nga AstrBot plugin jā, mā Agent sub Agent jhō jhō kō mā hō. Sō pō tsō pō (safe/medium/full) tā pō, sub Agent shō sub Agent mā kō, system hō. Jhō ingāp, jhā jhō qo jhō ya.
+Dynamic SubAgent ist ein AstrBot-Plugin, das es dem Haupt-Agent ermöglicht, dynamisch Sub-Agenten zu erstellen und zu verwalten. Es verfügt über drei Stufen der Berechtigungsisolierung (safe/medium/full) und eine Begrenzung der Verschachtelungstiefe, Sub-Agenten können keine weiteren Sub-Agenten erstellen, was die Systemsicherheit gewährleistet. Unterstützt persistenten Speicher, Aufgabenübergabe und Kollaborationsverfolgung.
 
 ---
-*This introduction is written in 格曼语 (Geman).*
+*This introduction is written in Geman (Geman).*

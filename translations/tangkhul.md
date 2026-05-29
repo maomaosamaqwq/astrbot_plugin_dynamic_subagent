@@ -1,6 +1,6 @@
-# 唐克胡尔语 — Dynamic SubAgent
+# Tangkhul — Dynamic SubAgent
 
-Dynamic SubAgent nga AstrBot plugin jā, mā Agent sub Agent jhō jhō kō mā hō. Sō pō tsō pō (safe/medium/full) tā pō jap, sub Agent shō sub Agent mā kō, system hō. Jhō ingāp, jhā jhō qo jhō ya.
+Dynamic SubAgent AstrBot plugin amani, mazung agent luida sub-agent kachanak kasot kashirik akh athikham kala. Tarung level permission isolation (safe/medium/full) akh nesting depth limit ama, sub-agent luida sub-agent mashirik kashirik akh, system security kala. Persistent memory, task transfer akh collaboration tracking kashirik.
 
 ---
-*This introduction is written in 唐克胡尔语 (Tangkhul).*
+*This introduction is written in Tangkhul (Tangkhul).*

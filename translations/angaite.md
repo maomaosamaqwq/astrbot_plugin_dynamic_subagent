@@ -1,6 +1,6 @@
-# Angaité (Enxet) — Dynamic SubAgent
+# Angaite — Dynamic SubAgent
 
-Dynamic SubAgent AstrBot plugin, agente sub-agent kely. Kely kely (safe/medium/full) kely, sub-agent kely sub-agent kely. Kely kely, kely kely, kely kely kely.
+Dynamic SubAgent es un plugin de AstrBot que permite al agente principal crear y gestionar sub-agentes de forma dinámica. Cuenta con tres niveles de aislamiento de permisos (safe/medium/full) y límite de profundidad de anidamiento, los sub-agentes no pueden crear otros sub-agentes, garantizando la seguridad del sistema. Soporta memoria persistente, transferencia de tareas y seguimiento de colaboración.
 
 ---
-*This introduction is written in Angaité (Angaité).*
+*This introduction is written in Angaite (Angaite).*

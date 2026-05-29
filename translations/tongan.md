@@ -1,6 +1,6 @@
-# Lea Faka-Tonga Fakamatala
+# Tongan — Dynamic SubAgent
 
-Ko OpenClaw ko ha polatipōme tākiekina 'o e tokoni AI 'oku ne fehokotaki ki he ngaahi lea fakakaukau kehekehe hangē koa Telegram, Discord mo WhatsApp. 'Oku ne poupou ki he lahi 'o e ngaahi sīpinga AI pea lava 'o ngāue'aki 'a e ngaahi me'angaue mo e poto kehekehe ke fakahoko 'a e ngaahi ngāue. Liliu 'e he kakai, 'oku talitali lelei 'e OpenClaw 'a e ngaahi tokoni mei he kakai kotoa 'oku nau holi ke langa 'enau tokoni poto 'a'ana.
+Ko e Dynamic SubAgent ko ha plugin 'a e AstrBot 'oku fakafaingamalie'i 'aki 'a e agent lalahi ke fakatupu mo fakatonutonu 'a e sub-agent. 'E i ai ha ngaahi taha 'o e tu'unga 'o e tukukehe (safe/medium/full) mo e 'uluaki 'o e loloto, 'e 'ikai lava 'e he sub-agent ke fakatupu 'a e sub-agent kehe, 'oku fakapapau'i 'a e malu'i 'o e system. 'Oku tokanga'i 'a e manatu tefito, 'ave 'a e ngue mo e muimui 'i he fakataha.
 
 ---
-*This introduction is written in Lea Faka-Tonga (Tongan).*
+*This introduction is written in Tongan (Tongan).*

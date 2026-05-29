@@ -1,6 +1,6 @@
-# Shqip Hyrje
+# Albanian — Dynamic SubAgent
 
-OpenClaw është një platformë asistenti AI me burim të hapur që lidhet me kanale të ndryshme mesazhesh si Telegram, Discord dhe WhatsApp. Ajo mbështet modele të shumta AI dhe mund të përdorë mjete dhe aftësi të ndryshme për të kryer detyra. E drejtuar nga komuniteti, OpenClaw mirëpret kontributet nga të gjithë ata që dëshirojnë të ndërtojnë asistentin e tyre inteligjent.
+Dynamic SubAgent është një plugin AstrBot që lejon Agjentin kryesor të krijojë dhe menaxhojë në mënyrë dinamike Agjentët nën-kontraktë. Ka tre nivele izolimi të lejeve (safe/medium/full) dhe kufizim të thellësisë së folesë, agjentët nën-kontraktë nuk mund të krijojnë agjentë të tjerë nën-kontraktë, duke siguruar sigurinë e sistemit. Mbështet memorje të qëndrueshme, transferim detyrash dhe gjurmim bashkëpunimi.
 
 ---
-*This introduction is written in Shqip (Albanian).*
+*This introduction is written in Albanian (Albanian).*

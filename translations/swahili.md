@@ -1,6 +1,6 @@
-# Kiswahili Utangulizi
+# Kiswahili — Dynamic SubAgent
 
-OpenClaw ni jukwaa la wazi la wasaidizi wa AI linalounganisha na njia mbalimbali za ujumbe kama vile Telegram, Discord na WhatsApp. Linasaidia modeli nyingi za AI na linaweza kutumia zana na ujuzi mbalimbali kutekeleza kazi. Linaloendeshwa na jumuiya, OpenClaw linakaribisha michango kutoka kwa kila mtu anayetaka kujenga msaidizi wake mwenye akili.
+Dynamic SubAgent ni programu-jalizi ya AstrBot inayomruhusu mkuu wa agent kuunda na kusimamia sub-agent kwa njia ya kubadilika. Ina ngazi tatu za kutenganisha ruhusa (safe/medium/full) na kina cha kuzidi, sub-agent hawawezi kuunda sub-agent wengine, kuhakikisha usalama wa mfumo. Inaunga mkono kumbukumbu ya kudumu, uhamishaji wa kazi na ufuatiliaji wa ushirikiano.
 
 ---
 *This introduction is written in Kiswahili (Swahili).*

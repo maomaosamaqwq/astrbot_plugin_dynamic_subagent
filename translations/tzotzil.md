@@ -1,6 +1,6 @@
-# Tzotzil (Bats'i K'op) — Dynamic SubAgent
+# Tzotzil — Dynamic SubAgent
 
-Dynamic SubAgent jun plugin AstrBot, ya x'ak' ta ilel ya xk'opoj sub-agent. Ya x'ak' ta ilel oxeb k'inal (safe/medium/full) ya x'ak' ta ilel sub-agent. Sub-agent me sk'an yich' sub-agent, me x'ak' ta ilel. Ya x'ak' ta ilel k'a'yej, ya x'ak' ta ilel pas, ya x'ak' ta ilel k'inal.
+Dynamic SubAgent jun AstrBot plugin le, ti agente principal ya sub-agentes crear y gestionar ya dinámicamente. Tres niveles aislamiento permisos (safe/medium/full) ya límite profundidad anidamiento, sub-agentes no puedan crear otros sub-agentes, sistema seguridad garantizada. Memoria persistente, transferencia tareas ya seguimiento colaboración soporta.
 
 ---
 *This introduction is written in Tzotzil (Tzotzil).*

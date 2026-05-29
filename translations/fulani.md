@@ -1,6 +1,6 @@
-# Fulfulde (Pulaar) Tannude
+# Fulani — Dynamic SubAgent
 
-OpenClaw ko njuɓɓudi mballitoowo AI udditiindi e ɓundu, jokkondirndi e laawol ngolzol keewngol hono Telegram, Discord e WhatsApp. No wallita e modelji AI keewɗi, no waawi huutoraade kuutorɗe keewɗe e ganyol ngol karallal keewngal heɓaade. Ko renndo ardii ɗum, OpenClaw yarlake dokke kala on mo faalaa feɗɗitondirde mballitoowo mawɗo makko.
+Dynamic SubAgent nde plugin AstrBot moƴƴi haa agent ɓurngol ina taga e jitaa sub-agent ɓe e jaabi. Heɓi tinorde sakkitiigi hakkilisolasi (safe/medium/full) e jaajol hakkunde, sub-agent ɓe ko wari taga e jitaa sub-agent ɓe ɗo, haa e jaawol kaɓirgol. Wallitoo hakkunde memori jaajol, jibingol kitaa e jokkondiral.
 
 ---
-*This introduction is written in Fulfulde (Fulani).*
+*This introduction is written in Fulani (Fulani).*

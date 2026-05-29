@@ -1,6 +1,6 @@
-# Gàidhlig na h-Alba Ro-ràdh
+# Gàidhlig — Dynamic SubAgent
 
-Tha OpenClaw na àrd-ùrlar cùmhnaidh AI le stòr fosgailte a bhios a' ceangal ri diofar sheanalaichean teachdaireachd mar Telegram, Discord agus WhatsApp. Tha e a' toirt taic do iomadh modal AI agus faodaidh e diofar innealan agus sgilean a chleachdadh gus gnìomhan a choileanadh. Air a stiùireadh leis a' choimhearsnachd, tha OpenClaw a' cur fàilte air tabhartasan bho gach neach a tha airson an neach-cuideachaidh glic aca fhèin a thogail.
+'S e plugan AstrBot a tha ann an Dynamic SubAgent a bheir comas don phrìomh-ghníomhaire sub-ghníomhairean a chruthachadh is a stiùireadh gu dèanamh. Tha trì ìreanan de dhealaicheadh ceadan (safe/medium/full) is crìoch doimhneachd neadaich, chan urrainn do sub-ghníomhairean sub-ghníomhairean eile a chruthachadh, a' dèanamh cinnteach gum bi an siostam tèarainte. Taic ri cuimhne mhaireannach, tar-chur dreuchdan is tracadh com-pàirteachd.
 
 ---
-*This introduction is written in Gàidhlig na h-Alba (Scottish Gaelic).*
+*This introduction is written in Gàidhlig (Scottish Gaelic).*

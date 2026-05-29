@@ -1,6 +1,6 @@
 # Ket — Dynamic SubAgent
 
-Dynamic SubAgent AstrBot-da plagin, qa Agent-de subAgent-en' dinamik aqta va ujta. Ux' qo'k bet (safe/medium/full) va qo'k l'bet, subAgent-en' at subAgent-en' aqtejet, sistem qoj. Persisten de'ŋ, i'p ujta va qa't ujta.
+Dynamic SubAgent — это плагин AstrBot, который позволяет основному Agent динамически создавать и управлять суб-Agentами. Имеет три уровня изоляции разрешений (safe/medium/full) и ограничение глубины вложенности, суб-Agent не может создавать другие суб-Agentы, обеспечивая безопасность системы. Поддерживает постоянную память, передачу задач и отслеживание сотрудничества.
 
 ---
-*This introduction is written in Ket.*
+*This introduction is written in Ket (Ket).*

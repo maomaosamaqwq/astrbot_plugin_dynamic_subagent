@@ -1,6 +1,6 @@
-# ᐃᓄᒃᑎᑐᑦ ᑐᓴᖅ
+# Inuktitut — Dynamic SubAgent
 
-OpenClaw ᐱᓯᐊᖅᑐᖅ ᐃᓕᐅᕐᓂᖅ AI ᐃᑲᔪᖅᑎ ᐊᕐᕌᒎᑕᐅᕙᖅᑐᖅ Telegram, Discord, WhatsApp ᒥ ᑕᐃᒪᐃᑦ ᑎᑎᕋᖅᓯᒪᔪᑦ. ᐊᒥᓲᓂᖅ AI ᒧᑎᑦ ᐃᑲᔪᖅᑎᑦᑎᔪᖅ ᐊᒻᒪ ᐊᑐᖅᑎᑦᑎᔪᖅ ᐊᒥᓲᓂᖅ ᑎᑎᕋᐅᑎᑦ ᐊᒻᒪ ᐃᓕᐅᕐᓂᖅ. ᓄᓇᓕᖕᓂᑦ ᐱᓯᐊᖅᑐᖅ, OpenClaw ᑐᓵᖅᑐᖅ ᑕᒪᕐᒥᒃ ᑐᕌᒃᑐᓂᒃ ᐊᖏᕐᕋᖅᑎᑦᑎᓂᕐᒥᒃ.
+Dynamic SubAgent AstrBot-ᒥᐅᔪᖅ ᐱᕙᓪᓕᐊᔪᖅ ᐊ扽ᖏᓂᐊᕐᓂᕐᒥᒃ ᐊᔾᔨᐅᖏᑦᑐᖅ ᐊ㎎ᓛᓂᐅᔪᓂᒃ ᐊ㎎ᓛᓂᐅᔪᓂᒡᓗ. ᐱᔪᓐᓇᐅᑎᖃᖅᐳᖅ ᐱᕙᓪᓕᐊᔪᓂᒃ ᐊ㎎ᓛᓂᐅᔪᓄᑦ ᐊ㎎ᓛᓂᐅᔪᓂᒡᓗ. ᐱᕙᓪᓕᐊᔪᖅ ᐊ㎎ᓛᓂᐅᔪᓂᒃ ᐊ㎎ᓛᓂᐅᔪᓂᒡᓗ ᐊ㎎ᓛᓂᐅᔪᓄᑦ ᐊ㎎ᓛᓂᐅᔪᓂᒡᓗ.
 
 ---
-*This introduction is written in ᐃᓄᒃᑎᑐᑦ (Inuktitut).*
+*This introduction is written in Inuktitut (Inuktitut).*

@@ -1,6 +1,6 @@
-# 傈僳语 — Dynamic SubAgent
+# Lisu — Dynamic SubAgent
 
-Dynamic SubAgent nga AstrBot plugin jā, mā Agent qo sub Agent jhō jhō kō mā hō. Sō pō tsō pō (safe/medium/full) tā pō jap, sub Agent shō sub Agent mā kō, system hō pō. Jhō ingāp, jhā jhō qo jhō ya.
+Dynamic SubAgent ᐅ🤶 AstrBot ᓇᔨᐅᕙᐅᔭᐅᔪᖅ ᐱᕙᓪᓕᐊᔪᓂᒃ ᐊ㎎ᓛᓂᐅᔪᓂᒃ ᐊ㎎ᓛᓂᐅᔪᓂᒡᓗ. Dynamic SubAgent ꓠꓳꓽ ꓐꓳꓽ ꓡꓯꓽ AstrBot ꓟꓽ ꓒꓴꓽ ꓐꓰꓽ ꓟꓽ ꓠꓽ ꓐꓳꓽ ꓡꓯꓽ ꓮꓽ ꓢꓽ ꓡꓽ ꓪꓽ ꓕꓽ ꓬꓽ ꓠꓽ ꓐꓽ ꓟꓽ. ꓠꓽ ꓐꓽ ꓡꓽ ꓮꓽ ꓢꓽ ꓡꓽ ꓪꓽ ꓕꓽ ꓬꓽ ꓠꓽ ꓐꓽ ꓟꓽ ꓠꓽ ꓐꓽ ꓡꓽ ꓮꓽ ꓢꓽ ꓡꓽ ꓪꓽ.
 
 ---
-*This introduction is written in 傈僳语 (Lisu).*
+*This introduction is written in Lisu (Lisu).*

@@ -1,6 +1,6 @@
-# Hrvatski Uvod
+# Croatian — Dynamic SubAgent
 
-OpenClaw je platforma otvorenog koda za AI asistente koja se povezuje s različitim kanalima za razmjenu poruka kao što su Telegram, Discord i WhatsApp. Podržava više AI modela i može koristiti različite alate i vještine za obavljanje zadataka. Vođena zajednicom, OpenClaw pozdravlja doprinose svih koji žele izgraditi vlastitog inteligentnog asistenta.
+Dynamic SubAgent je AstrBot plugin koji omogućuje glavnom agentu dinamičko stvaranje i upravljanje pod-agentima. Ima tri razine izolacije dozvola (safe/medium/full) i ograničenje dubine ugnježđivanja, pod-agenti ne mogu stvarati druge pod-agente, osiguravajući sigurnost sustava. Podržava trajnu memoriju, prijenos zadataka i praćenje suradnje.
 
 ---
-*This introduction is written in Hrvatski (Croatian).*
+*This introduction is written in Croatian (Croatian).*

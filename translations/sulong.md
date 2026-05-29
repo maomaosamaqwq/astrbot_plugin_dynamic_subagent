@@ -1,6 +1,6 @@
-# 苏龙语 — Dynamic SubAgent
+# Sulong — Dynamic SubAgent
 
-Dynamic SubAgent nga AstrBot plugin jā, mā Agent sub Agent jhō jhō kō mā hō. Sō pō tsō pō (safe/medium/full) tā pō, sub Agent shō sub Agent mā kō, system hō pō. Jhō ingāp, jhā jhō qo jhō ya.
+Dynamic SubAgent ialah plugin AstrBot yang membolehkan agen utama mencuba dan mengurus sub-agen secara dinamik. Mempunyai tiga tahap pengasingan kebenaran (safe/medium/full) dan had kedalaman, sub-agen tidak boleh mencipta sub-agen lain, memastikan keselamatan sistem. Menyokong memori kekal, pemindahan tugas dan penjejakan kerjasama.
 
 ---
-*This introduction is written in 苏龙语 (Sulong).*
+*This introduction is written in Sulong (Sulong).*

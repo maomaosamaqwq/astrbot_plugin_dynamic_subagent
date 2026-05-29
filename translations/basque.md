@@ -1,6 +1,6 @@
-# Euskara Sarrera
+# Basque — Dynamic SubAgent
 
-OpenClaw kode irekiko AI laguntzaile plataforma bat da, Telegram, Discord eta WhatsApp bezalako mezu-kanal ezberdinetara konektatzen dena. AI modelo anitz onartzen ditu eta hainbat tresna eta trebetasun erabil ditzake lanak egiteko. Komunitateak gidatuta, OpenClaw-ek ongietorria ematen die bere laguntzaile adimenduna eraiki nahi duen guztien ekarpenak.
+Dynamic SubAgent AstrBot plugin bat da, agente nagusiari azpi-agenteak dinamikoki sortu eta kudeatzeko aukera ematen diona. Baimen isolamendu hiru maila ditu (safe/medium/full) eta habiaratze sakonera mugak, azpi-agenteek ezin dute beste azpi-agenteik sortu, sistemaren segurtasuna bermatuz. Memoria iraunkorra, ataza transferentzia eta lankidetza jarraipena onartzen ditu.
 
 ---
-*This introduction is written in Euskara (Basque).*
+*This introduction is written in Basque (Basque).*

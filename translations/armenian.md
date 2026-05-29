@@ -1,6 +1,6 @@
-# Հայերեն Ներածություն
+# Armenian — Dynamic SubAgent
 
-OpenClaw-ը բաց կոդով AI օգնականի հարթակ է, որը միանում է տարբեր հաղորդագրությունների ուղիների, ինչպիսիք են Telegram-ը, Discord-ը և WhatsApp-ը: Այն աջակցում է բազմաթիվ AI մոդելների և կարող է օգտագործել տարբեր գործիքներ և հմտություններ առաջադրանքները կատարելու համար: Համայնքի կողմից ղեկավարվող OpenClaw-ը ողջունում է բոլոր նրանց ներդրումը, ովքեր ցանկանում են ստեղծել իրենց սեփական խելացի օգնականը:
+Dynamic SubAgent-ն AstrBot-ի plugin-ն է, որը հնարավորություն է տալիս գլխավոր Agent-ին դինamik kerpov steghtsel ev karavar el sub Agent-ner: Uni trvacutyunneri yerek makardaki mejkocum (safe/medium/full) ev nermacman xorutyun sahranman, sub Agent-ner chen karogh steghtsel ayl sub Agent-ner, apahovum e hamakargi anvtangutyun: Yndunum e misht teghtsvats hishogutyun, xndir hskgnogh ev hamateghtsekman hashvetum:
 
 ---
-*This introduction is written in Հայերեն (Armenian).*
+*This introduction is written in Armenian (Armenian).*

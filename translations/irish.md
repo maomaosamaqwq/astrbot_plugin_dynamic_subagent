@@ -1,6 +1,6 @@
-# Gaeilge Réamhrá
+# Irish — Dynamic SubAgent
 
-Is ardán foinse oscailte é OpenClaw do chúntóirí AI a nascann le bealaí teachtaireachtaí éagsúla ar nós Telegram, Discord agus WhatsApp. Tacaíonn sé le samhlacha AI iolracha agus féadann sé uirlisí agus scileanna éagsúla a úsáid chun tascanna a chur i gcrích. Á thiomáint ag an bpobal, cuireann OpenClaw fáilte roimh ranníocaíochtaí ó gach duine ar mian leo a gcúntóir cliste féin a thógáil.
+Is breiseán AstrBot é Dynamic SubAgent a ligeann don Phríomh-Ghníomhaire fo-Ghníomhairí a chruthú agus a bhainistiú go dinimiciúil. Tá trí leibhéal scaradh ceadanna aige (safe/medium/full) agus teorainn doimhneacht neadaithe, nach féidir le fo-Ghníomhairí fo-Ghníomhairí eile a chruthú, ag cinntiú slándáil an chórais. Tacaíonn le cuimhne sheasmhach, aistriú tascanna agus rianú comhoibrithe.
 
 ---
-*This introduction is written in Gaeilge (Irish).*
+*This introduction is written in Irish (Irish).*

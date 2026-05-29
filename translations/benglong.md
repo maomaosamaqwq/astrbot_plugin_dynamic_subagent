@@ -1,6 +1,6 @@
-# 崩龙语 — Dynamic SubAgent
+# Benglong — Dynamic SubAgent
 
-Dynamic SubAgent nga AstrBot plugin jā, mā ăng qo sub ăng jhō jhō kō mā hō nā. Sō pō tsō pō (safe/medium/full) tā pō jap, sub ăng nga shō sub ăng mā kō, system hō pō. Jhō ingāp, jhā qo jhō tsō.
+Dynamic SubAgent 是 AstrBot 的一个插件，让主 Agent 可以动态创建和管理子 Agent。具备三级权限隔离（safe/medium/full）和嵌套深度限制，子 Agent 无法再创建子 Agent，确保系统安全。支持持久化记忆、任务移交和协作追踪。
 
 ---
-*This introduction is written in 崩龙语 (Benglong).*
+*This introduction is written in Benglong (Benglong).*

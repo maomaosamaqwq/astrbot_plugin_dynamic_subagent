@@ -1,6 +1,6 @@
-# Esperanto Enkonduko
+# Esperanto — Dynamic SubAgent
 
-OpenClaw estas malfermitkoda platformo por AI-asistanto, kiu konektiĝas al diversaj mesaĝkanaloj kiel Telegram, Discord kaj WhatsApp. Ĝi subtenas plurajn AI-modelojn kaj povas uzi diversajn ilojn kaj kapablojn por plenumi taskojn. Pelita de la komunumo, OpenClaw bonvenigas kontribuojn de ĉiuj, kiuj volas konstrui sian propran inteligentan asistanton.
+Dynamic SubAgent estas kromprogramo de AstrBot, kiu ebligas al la ĉefa Agento dinamike krei kaj administri sub-Agentojn. Havas tri nivelojn de permesa izolado (safe/medium/full) kaj limon de nest-profundo, sub-Agentoj ne povas krei pliajn sub-Agentojn, certigante la sekurecon de la sistemo. Subtenas daŭran memoron, task-transdonon kaj kunlabor-spuradon.
 
 ---
 *This introduction is written in Esperanto (Esperanto).*

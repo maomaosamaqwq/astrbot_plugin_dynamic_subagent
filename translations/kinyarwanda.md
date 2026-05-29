@@ -1,6 +1,6 @@
-# Ikinyarwanda Intangiriro
+# Kinyarwanda — Dynamic SubAgent
 
-OpenClaw ni urubuga rufunguye rw'umufasha wa AI ruhuza n'imiyoboro itandukanye yohereza ubutumwa nka Telegram, Discord na WhatsApp. Rushyigikira moderi nyinshi za AI kandi rushobora gukoresha ibikoresho n'ubuhanga butandukanye kugira ngo rukore imirimo. Iyobowe n'umuryango, OpenClaw yakira impano z'abantu bose bashaka kubaka umufasha wabo w'ubwenge.
+Dynamic SubAgent ni plugin ya AstrBot ituma Agent nyamukuru ishobora gukora no gucunga sub-Agent mu buryo bwikora. Ifite urwego ruratu rw'ibanga (safe/medium/full) n'umugongo w'ubujyakuzimu, aho sub-Agent idashobora gukora indi sub-Agent, bigatuma ubwizerere bw'ububiko bwizewe. Ishyigikira ubwibunge bw'igihe kirekire, gutanga imirimo no gukurikirana ubufatanye.
 
 ---
-*This introduction is written in Ikinyarwanda (Kinyarwanda).*
+*This introduction is written in Kinyarwanda (Kinyarwanda).*

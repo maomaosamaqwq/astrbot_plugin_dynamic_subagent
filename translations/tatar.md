@@ -1,6 +1,6 @@
-# Tatar — Dynamic SubAgent
+# Татар — Dynamic SubAgent
 
-Dynamic SubAgent — AstrBot öçen bir plagin, ul töp Agent-kä subAgent-larnı dinamik räweştä buldırırğa häm idarä itärgä mömkinlek birä. Öç däräcäle izolätsiya (safe/medium/full) häm içke çitlängän tiränlek çikläwläre bar, subAgent-lar başqa subAgent-nı buldıra almıy, sistem säğädäten tä'min itä. Persisten xäter, tapşırıqnı tapşırü häm berlektä eşne küzätü mömkin.
+Dynamic SubAgent — бу AstrBot кушымтасы, баш агентка агент-ярдәмчеләрне динамик рәвештә ясарга һәм идарә итәргә мөмкинлек бирә. Өч дәрәҗәле рөхсәт изоляциясе (safe/medium/full) һәм тирәнлек чиге бар, агент-ярдәмчеләр башка агент-ярдәмчеләр ясый алмыйлар, бу системаның иминлеген тәэмин итә. Даими хәтер, бурычлар күчерү һәм хезмәттәшлек күзәтүен яклый.
 
 ---
-*This introduction is written in Tatar.*
+*This introduction is written in Татар (Tatar).*

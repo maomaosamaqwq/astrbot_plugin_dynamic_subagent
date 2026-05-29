@@ -1,6 +1,6 @@
-# Apurinã (Apurinã) — Dynamic SubAgent
+# Apurina — Dynamic SubAgent
 
-Dynamic SubAgent AstrBot plugin, agente sub-agent apuri. Apuri apuri (safe/medium/full) apuri, sub-agent apuri sub-agent apuri. Apuri apuri, apuri apuri, apuri apuri apuri.
+Dynamic SubAgent é um plugin do AstrBot que permite ao agente principal criar e gerenciar sub-agentes dinamicamente. Possui três níveis de isolamento de permissão (safe/medium/full) e limite de profundidade de aninhamento, sub-agentes não podem criar outros sub-agentes, garantindo a segurança do sistema. Suporta memória persistente, transferência de tarefas e rastreamento de colaboração.
 
 ---
-*This introduction is written in Apurinã (Apurinã).*
+*This introduction is written in Apurina (Apurina).*

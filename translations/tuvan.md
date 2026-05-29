@@ -1,6 +1,6 @@
-# Tuvan — Dynamic SubAgent
+# Тыва дыл — Dynamic SubAgent
 
-Dynamic SubAgent — AstrBot-ka plugin, kol Agent-ke subAgent-ter-ni dinamik azirlaar bolgaş başkaarar chigzir. Üş kedee izolätsiya (safe/medium/full) bolgaş içtiñ deer čölgezi bar, subAgent-ter öske subAgent-ter-ni azirlaar chigzir, sisteme sen birge hanat. Persisten sağış, küskül ujurlanı bolgaş kajıltıjarını čediir.
+Dynamic SubAgent — бу AstrBot плагины, баш агентке агент-көмеңниктери динамик болгаш чогаалырны өөредип бедиреңерге мүмкүн. Үш деңгел рухсат изоляциязы (safe/medium/full) болгаш тиреңдик чиге бар, агент-көмеңниктер башка агент-көмеңниктер чогаалбас, системаның аман-чоокчузын камсыз кылар. Даанма хугъурум, ырыс көчүрүү болгаш хамдырыштырны күзеңерге көмектешер.
 
 ---
-*This introduction is written in Tuvan.*
+*This introduction is written in Тыва дыл (Tuvan).*

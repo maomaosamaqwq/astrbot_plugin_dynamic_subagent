@@ -1,6 +1,6 @@
-# 嘉绒语 — Dynamic SubAgent
+# Jiarong — Dynamic SubAgent
 
-Dynamic SubAgent nga AstrBot plugin jā, mā Agent sub Agent jhō jhō kō mā hō. Sō pō tsō pō (safe/medium/full) tā pō jap, sub Agent shō sub Agent mā kō, system hō pō. Jhō ingāp, jhā jhō qo jhō ya.
+Dynamic SubAgent ནི་ AstrBot གི་པྲ་ལག་ཞིག་ཡིན་པས། གཙོ་བོ་ Agent ལ་ sub-Agent འཕྲུལ་ཆོས་ཀྱིས་བཟོ་དང་དོ་དམ་བྱེད་དུ་འཇུག་པ་ཡིན། གནས་ཚད་གསུམ་གྱི་ཆོག་མཆན་ཁ་བྲལ་བྱེད་ཐབས་ཡོད་པ་དང་། sub-Agent གིས་ sub-Agent་གཞན་བཟོ་མི་ཐུབ་པས། རྒྱུད་ཁོངས་ཀྱི་བདེ་འཇགས་འགན་ལེན་བྱེད། ཡུན་རིང་དྲན་པ་དང་ལས་ཀ་སྤྲོད་ལེན། མཉམ་ལས་རྗེས་འཚོལ་ལ་རྒྱབ་སྐྱོར་བྱེད།
 
 ---
-*This introduction is written in 嘉绒语 (Jiarong).*
+*This introduction is written in Jiarong (Jiarong).*

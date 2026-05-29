@@ -1,6 +1,6 @@
-# Türkmen dili Tanşdyryş
+# Türkmen — Dynamic SubAgent
 
-OpenClaw — açyk çeşmeli AI kömekçi platformasy bolup, Telegram, Discord we WhatsApp ýaly dürli habarlaşma kanallaryna birleşýär. Ol birnäçe AI modellerini goldaýar we wezipeleri ýerine ýetirmek üçin dürli gurallar we başarnyklary ulanyp biler. Jemgyýet tarapyndan dolandyrylýan OpenClaw öz akylly kömekçisini gurmak isleýän her kimiň goşandyny garşylaýar.
+Dynamic SubAgent — bu AstrBot goşundydyr, esasy agenta sub-agentleri dinamiki döretmek we dolandyrmak mümkinçiligini berär. Üç derejeli rugsat izolýasiýasy (safe/medium/full) we çuň derinlik çägi bar, sub-agentler beýleki sub-agentleri döredip bilmezler, ulgam ygtybarlygyny üpjün eder. Döwrebil ýat, iş geçirmek we hyzmatdaşlyk yzarlamasyna goldaw berýär.
 
 ---
-*This introduction is written in Türkmen dili (Turkmen).*
+*This introduction is written in Türkmen (Turkmen).*

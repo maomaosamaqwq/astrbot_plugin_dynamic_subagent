@@ -1,6 +1,6 @@
 # Toraja — Dynamic SubAgent
 
-Dynamic SubAgent iamotu plugin AstrBot umba mangkaanni Agent utama undinna' siang ma'palaran subAgent dinamik. Inda' tallu tingkanna isolasi (safe/medium/full) siang batesan kalambunan nested, subAgent tae' na undinna' subAgent pole, umbammantanan kamaruaan sistem. Unggahii memori persisten, ma'pasian tugas, siang palacakan kolaborasi.
+Dynamic SubAgent ne anak plugin AstrBot le lenang mepara agen utama ngawang sub-agen. Tiga tingkat izolasi perizinan (safe/medium/full) lan wates ambang ne, sub-agen ne boten dados ngawang sub-agen malih, ngawis kaamanan sistem. Ndungketin memori persisten, pindah tugas lan lacak kerja sama.
 
 ---
-*This introduction is written in Toraja.*
+*This introduction is written in Toraja (Toraja).*

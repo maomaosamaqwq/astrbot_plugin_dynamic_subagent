@@ -1,6 +1,6 @@
-# ⲘⲉⲧⲢⲉⲙⲛ̀Ⲭⲏⲙⲓ Ⲥⲁϫⲓ
+# Coptic — Dynamic SubAgent
 
-Ⲟⲩⲛ̀ⲧⲁϥ ⲛ̀ϫⲉ OpenClaw ⲟⲩⲥⲟϩⲛⲉ ⲙ̀ⲃⲏⲧ ⲉϥⲟⲩⲏⲃ ⲙ̀ⲃⲟⲗ ⲛ̀ⲧⲉ ⲛⲓⲙⲟⲛ̀ⲧⲱⲣ ⲛ̀AI, ⲉϥⲧⲱⲛⲉ ⲉ̀ⲛⲁⲙⲱⲓⲧ ⲛ̀ⲧⲉ ⲛⲓⲥ̀ⲙⲟⲩ ⲛ̀ⲧⲉ Telegram, Discord ⲛⲉⲙ WhatsApp. Ⲉⲣⲉϥⲙⲟⲩⲧⲉ ⲉ̀ⲛⲁⲙⲟⲣⲫⲏ ⲛ̀AI ⲛ̀ϩⲁϩ ⲟⲩⲟϩ ⲉⲣⲉϥⲉⲣⲭⲣⲁⲥⲑⲉ ⲛ̀ⲛⲁⲥⲕⲉⲩⲟⲥ ⲛⲉⲙ ⲛⲁⲧⲥⲁⲃⲉ ⲉ̀ⲃⲟⲗ ϧⲉⲛ ⲛⲓⲙⲩⲥⲧⲏⲣⲓⲟⲛ. Ⲛⲑⲟϥ ⲉⲧⲟⲛϧ ⲉ̀ⲃⲟⲗ ϧⲉⲛ ⲧⲙⲉⲧⲟⲩⲏⲏⲃ ⲟⲩⲟϩ ϣⲁϥϣⲉⲡ ⲛ̀ⲣⲱⲟⲩ ⲙ̀ⲙⲉϩ ϧⲁⲣⲱⲛ.
+Dynamic SubAgent is an AstrBot plugin that allows the main Agent to dynamically create and manage sub-agents. It features three levels of permission isolation (safe/medium/full) and nesting depth limits, preventing sub-agents from creating further sub-agents to ensure system security. Supports persistent memory, task handoff, and collaboration tracking.
 
 ---
-*This introduction is written in ⲘⲉⲧⲢⲉⲙⲛ̀Ⲭⲏⲙⲓ (Coptic).*
+*This introduction is written in Coptic (Coptic).*

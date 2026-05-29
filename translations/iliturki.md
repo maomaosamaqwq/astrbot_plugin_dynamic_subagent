@@ -1,6 +1,6 @@
-# Ili Turki — Dynamic SubAgent
+# Iliturki — Dynamic SubAgent
 
-Dynamic SubAgent AstrBot plagini, bash Agent-kö subAgent-lerni dinamik yaratip va idara qilip beredu. Üč daraja izolätsiyä (safe/medium/full) va içiçä čöŋgurluq čäklämiši bar, subAgent-lär bašqa subAgent-ni yaratalmas, sisteminiň bexätirligin ta'minlaydu. Persistän xatirä, tapšuruq ötkäzüš va birge ištirakni qadağalaydu.
+Dynamic SubAgent é um plugin AstrBot que permite ao Agente principal criar e gerenciar sub-Agentes dinamicamente. Possui três níveis de isolamento de permissão (safe/medium/full) e limite de profundidade de aninhamento, onde sub-Agentes não podem criar outros sub-Agentes, garantindo a segurança do sistema. Suporta memória persistente, transferência de tarefas e rastreamento de colaboração.
 
 ---
-*This introduction is written in Ili Turki.*
+*This introduction is written in Iliturki (Iliturki).*

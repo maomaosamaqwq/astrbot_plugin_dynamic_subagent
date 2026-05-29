@@ -1,6 +1,6 @@
-# Svenska Introduktion
+# Svenska — Dynamic SubAgent
 
-OpenClaw är en plattform med öppen källkod för AI-assistenter som ansluter till olika meddelandekanaler som Telegram, Discord och WhatsApp. Den stöder flera AI-modeller och kan använda olika verktyg och färdigheter för att utföra uppgifter. Drivs av communityn, OpenClaw välkomnar bidrag från alla som vill bygga sin egen intelligenta assistent.
+Dynamic SubAgent är ett AstrBot-tillägg som låter huvudagenten dynamiskt skapa och hantera underagenter. Det har tre nivåer av behörighetsisolering (safe/medium/full) och begränsning av nestningsdjup, underagenter kan inte skapa andra underagenter, vilket säkerställer systemets säkerhet. Stöder permanent minne, uppgiftsöverföring och samarbetsuppföljning.
 
 ---
 *This introduction is written in Svenska (Swedish).*

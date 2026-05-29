@@ -1,6 +1,6 @@
-# Araucanian (Mapudungun) — Dynamic SubAgent
+# Araucanian — Dynamic SubAgent
 
-Dynamic SubAgent AstrBot plugin mu, tañi agente kiñe sub-agent eluwün. Küla rakiduam (safe/medium/full) müley, ka sub-agent kiñe sub-agent eluwün la. Rakiduam müley, küzaw müley, kiñewün müley.
+Dynamic SubAgent es un plugin de AstrBot que permite al agente principal crear y gestionar sub-agentes de forma dinámica. Cuenta con tres niveles de aislamiento de permisos (safe/medium/full) y límite de profundidad de anidamiento, los sub-agentes no pueden crear otros sub-agentes, garantizando la seguridad del sistema. Soporta memoria persistente, transferencia de tareas y seguimiento de colaboración.
 
 ---
 *This introduction is written in Araucanian (Araucanian).*

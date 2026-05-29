@@ -1,6 +1,6 @@
-# 勒期语 — Dynamic SubAgent
+# Leqi — Dynamic SubAgent
 
-Dynamic SubAgent nga AstrBot plugin jā, qo mā Agent nga jhō jhō kō sub Agent ve qo kō mā hō zā. Sā pō tsō qo pō (safe/medium/full) ngō tā tsō qo pō, sub Agent nga shō sub Agent ve qo mā kō, system nga hō pō. Jhō jhō ingāp, jhā jhō tā qo ngō tā tsō.
+Dynamic SubAgent adalah plugin AstrBot yang memungkinkan Agent utama untuk membuat dan mengelola sub-Agent secara dinamis. Memiliki tiga tingkat isolasi izin (safe/medium/full) dan batasan kedalaman bersarang, di mana sub-Agent tidak dapat membuat sub-Agent lainnya, memastikan keamanan sistem. Mendukung memori persisten, penyerahan tugas, dan pelacakan kolaborasi.
 
 ---
-*This introduction is written in 勒期语 (Leqi).*
+*This introduction is written in Leqi (Leqi).*

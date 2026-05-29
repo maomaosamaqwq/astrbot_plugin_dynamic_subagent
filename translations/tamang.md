@@ -1,6 +1,6 @@
-# 塔芒语 — Dynamic SubAgent
+# Tamang — Dynamic SubAgent
 
-Dynamic SubAgent nga AstrBot plugin jā, mā Agent sub Agent jhō jhō kō mā hō. Sō pō tsō pō (safe/medium/full) tā pō jap, sub Agent shō sub Agent mā kō, system hō pō. Jhō ingāp, jhā jhō qo jhō ya.
+Dynamic SubAgent एक AstrBot प्लगइन हो जसले मुख्य एजेन्टलाई उप-एजेन्टहरू गतिशील रूपमा सिर्जना र व्यवस्थापन गर्न अनुमति दिन्छ। तीन तहको अनुमति अलगाव (safe/medium/full) र नेस्टिङ गहिराइ सीमा छ, उप-एजेन्टहरूलाई थप उप-एजेन्टहरू सिर्जना गर्न रोक्छ, प्रणालीको सुरक्षा सुनिश्चित गर्छ। स्थायी मेमोरी, कार्य हस्तान्तरण र सहकार्य ट्र्याकिङ समर्थन गर्छ।
 
 ---
-*This introduction is written in 塔芒语 (Tamang).*
+*This introduction is written in Tamang (Tamang).*

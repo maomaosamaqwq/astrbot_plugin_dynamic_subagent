@@ -1,6 +1,6 @@
 # Q'eqchi' — Dynamic SubAgent
 
-Dynamic SubAgent a'an jun plugin AstrBot, na'aj ru ch'ol ch'ol li aj sub-agent. K'ojel oxib' li k'a'uxl (safe/medium/full) ut ch'ol ch'ol li poyok. Li sub-agent na'aj ru chi xk'ehok jun sub-agent. K'ojel li na'leb', k'ojel li tzolok, k'ojel li k'amok b'ek.
+Dynamic SubAgent jun AstrBot plugin ri, yaleb'aan chirib'il ex jun principal chi manaj sub-agentes. Ojtanäq li junilxa'anib'il ex ajilab'al (safe/medium/full) cha'laj li profundidad ex anidamiento, chi'in li sub-agentes man tok'in to'on chi'in crear sub-agentes, toj li seguridad ex sistema. Tz'ib'an junilxa'an memoria persistente, transferencia tareas cha'laj seguimiento colaboración.
 
 ---
-*This introduction is written in Q'eqchi' (Q'eqchi').*
+*This introduction is written in Q'eqchi' (Qeqchi).*

@@ -1,6 +1,6 @@
-# Kren Akare — Dynamic SubAgent
+# Krenakare — Dynamic SubAgent
 
-Dynamic SubAgent AstrBot plugin, agente sub-agent kre. Kre kre (safe/medium/full) kre, sub-agent kre sub-agent kre. Kre kre, kre kre, kre kre kre.
+Dynamic SubAgent é um plugin AstrBot que permite ao Agente principal criar e gerenciar sub-Agentes dinamicamente. Possui três níveis de isolamento de permissão (safe/medium/full) e limite de profundidade de aninhamento, onde sub-Agentes não podem criar outros sub-Agentes, garantindo a segurança do sistema. Suporta memória persistente, transferência de tarefas e rastreamento de colaboração.
 
 ---
-*This introduction is written in Kren Akare (Kren Akare).*
+*This introduction is written in Krenakare (Krenakare).*

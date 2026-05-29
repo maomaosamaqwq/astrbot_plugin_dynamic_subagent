@@ -1,6 +1,6 @@
-# Dansk Introduktion
+# Danish — Dynamic SubAgent
 
-OpenClaw er en open source AI-assistentplatform, der forbinder til forskellige beskedkanaler som Telegram, Discord og WhatsApp. Den understøtter flere AI-modeller og kan bruge en række værktøjer og færdigheder til at udføre opgaver. Drevet af fællesskabet byder OpenClaw velkommen til bidrag fra alle, der ønsker at bygge deres egen intelligente assistent.
+Dynamic SubAgent er et AstrBot-plugin, der giver hovedagenten mulighed for dynamisk at oprette og administrere underagenter. Har tre niveauer af tilladelsesisolering (safe/medium/full) og begrænsning af indlejringsdybden, underagenter kan ikke oprette andre underagenter, hvilket sikrer systemsikkerhed. Understøtter permanent hukommelse, opgaveoverdragelse og samarbejdssporing.
 
 ---
-*This introduction is written in Dansk (Danish).*
+*This introduction is written in Danish (Danish).*

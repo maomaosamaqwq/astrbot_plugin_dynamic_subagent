@@ -1,6 +1,6 @@
-# Latviešu valoda Ievads
+# Latvian — Dynamic SubAgent
 
-OpenClaw ir atvērtā pirmkoda AI asistenta platforma, kas savienojas ar dažādiem ziņojumu kanāliem, piemēram, Telegram, Discord un WhatsApp. Tā atbalsta vairākus AI modeļus un var izmantot dažādus rīkus un prasmes uzdevumu veikšanai. Kopienas vadīta, OpenClaw laipni aicina ikviena ieguldījumu, kurš vēlas izveidot savu inteliģento asistentu.
+Dynamic SubAgent ir AstrBot spraudnis, kas ļauj galvenajam Agent dinamiski izveidot un pārvaldīt sub-Agentus. Tam ir trīs līmeņu atļauju izolācija (safe/medium/full) un ligzdošanas dziļuma ierobežojums, kur sub-Agenti nevar izveidot citus sub-Agentus, nodrošinot sistēmas drošību. Atbalsta pastāvīgo atmiņu, uzdevumu pārsūtīšanu un sadarbības izsekošanu.
 
 ---
-*This introduction is written in Latviešu valoda (Latvian).*
+*This introduction is written in Latvian (Latvian).*

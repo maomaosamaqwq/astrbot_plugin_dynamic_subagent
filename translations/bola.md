@@ -1,6 +1,6 @@
-# 波拉语 — Dynamic SubAgent
+# Bola — Dynamic SubAgent
 
-Dynamic SubAgent nga AstrBot plugin jā, mā Agent qo sub Agent jhō jhō kō mā hō zā. Sō pō tsō pō (safe/medium/full) tā pō jap, sub Agent nga shō sub Agent mā kō, system nga hō pō. Jhō jhō ingāp, tā jhō qo jhō tsō.
+Dynamic SubAgent adalah plugin AstrBot yang memungkinkan agen utama membuat dan mengelola sub-agen secara dinamis. Memiliki tiga tingkat isolasi izin (safe/medium/full) dan batasan kedalaman bersarang, sub-agen tidak dapat membuat sub-agen lain, memastikan keamanan sistem. Mendukung memori persisten, penyerahan tugas, dan pelacakan kolaborasi.
 
 ---
-*This introduction is written in 波拉语 (Bola).*
+*This introduction is written in Bola (Bola).*

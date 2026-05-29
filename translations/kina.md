@@ -1,6 +1,6 @@
 # Kina — Dynamic SubAgent
 
-Dynamic SubAgent iami plugin AstrBot umba nopopalei Agent utama mpobua mpoaturi subAgent dinamik. Nomie tolu tingka isolasi (safe/medium/full) nomie batasa kalasi nested, subAgent te'a mpobua subAgent olo, nopojaga kamaja sistem. Nopopalei memori persisten, nopalele tugas, nomie palacakan kolaborasi.
+Dynamic SubAgent em i wan plugin bilong AstrBot we i givim Agent matblong i mekim na lukautim sub-Agent long olgeta taim. I gat tripela level bilong rait isolason (safe/medium/full) na limit bilong nesting, sub-Agent i no inap mekim narapela sub-Agent, na i mekim save bilong sistem i stap stret. I sapotim memori i stap oltaim, senisim wok na traim bilong wok bung.
 
 ---
-*This introduction is written in Kina.*
+*This introduction is written in Kina (Kina).*

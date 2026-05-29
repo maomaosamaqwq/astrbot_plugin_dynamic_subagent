@@ -1,6 +1,6 @@
-# Igbo Okike
+# Igbo — Dynamic SubAgent
 
-OpenClaw bụ ikpo okwu mepere emepe nke onye enyemaka AI nke na-ejikọta na ọwa ozi dị iche iche dịka Telegram, Discord na WhatsApp. Ọ na-akwado ọtụtụ ụdị AI ma nwee ike iji ngwaọrụ na nkà dị iche iche rụọ ọrụ. Nke obodo na-achịkwa, OpenClaw na-anabata onyinye sitere n'aka onye ọ bụla chọrọ ịwulite onye enyemaka ọgụgụ isi nke ha.
+Dynamic SubAgent bụ ngwa AstrBot na-enye ohere ka onye nchịkwa Agent kpọọ okwu ma jikwaa ndị nta nta Agent n'ụzọ doro anya. Nwere ọkwa atọ nchebe ikike (safe/medium/full) na oke ịdị omimi, ndị nta nta Agent enweghị ike ịmepụta ndị nta nta Agent ọzọ, nke na-eme ka usoro ahụ dị nchebe. Na-akwado ncheta na-adịgide adịgide, nnyefe oru na nsochi onyinye mmekọrịta.
 
 ---
-*This introduction is written in Igbo (Igbo).*
+*This introduction is written in Igbo.*

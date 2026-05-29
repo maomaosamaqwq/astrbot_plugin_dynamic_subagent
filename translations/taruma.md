@@ -1,6 +1,6 @@
-# Tarumá — Dynamic SubAgent
+# Taruma — Dynamic SubAgent
 
-Dynamic SubAgent AstrBot plugin, agente sub-agent. sub-agent (safe/medium/full). sub-agent sub-agent.
+Dynamic SubAgent é um plugin do AstrBot que permite ao agente principal criar e gerenciar sub-agentes dinamicamente. Possui três níveis de isolamento de permissões (safe/medium/full) e limite de profundidade de aninhamento, impedindo que sub-agentes criem outros sub-agentes, garantindo a segurança do sistema. Suporta memória persistente, transferência de tarefas e rastreamento de colaboração.
 
 ---
-*This introduction is written in Tarumá (Tarumá).*
+*This introduction is written in Taruma (Taruma).*

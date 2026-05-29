@@ -1,6 +1,6 @@
 # Itelmen — Dynamic SubAgent
 
-Dynamic SubAgent AstrBot-ka kăsx, enč-ke subAgent-anč kălkasxčeň va ujčin. Kčok ksankeč (safe/medium/full) va sencx kišankeč, subAgent-anč qa subAgent-anč kălkazčin, sistem kăčkeč. Persisten kitin, qazxčin va keŋeč kăskasxčeň.
+Dynamic SubAgent — AstrBot асчыштык, киви асчалан асчыштык Agent кивинив асчыштык суб-Agent асчыштык. Три уровня изоляции разрешений (safe/medium/full) и ограничение глубины вложенности, суб-Agent не может создавать другие суб-Agent, обеспечивая безопасность системы. Поддерживает постоянную память, передачу задач и отслеживание сотрудничества.
 
 ---
-*This introduction is written in Itelmen.*
+*This introduction is written in Itelmen (Itelmen).*

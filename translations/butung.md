@@ -1,6 +1,6 @@
 # Butung — Dynamic SubAgent
 
-Dynamic SubAgent yami plugin AstrBot umba nopopalee Agent utama mpobua mpoaturi subAgent dinamik. Nomie talu tingka isolasi (safe/medium/full) nomie batasa kalola nested, subAgent te'a mpobua subAgent ole, nopojaga kamaja sistem. Nopopalee memori persisten, nopalele tugas, nomie palacakan kolaborasi.
+Dynamic SubAgent adalah plugin AstrBot yang memungkinkan agen utama membuat dan mengelola sub-agen secara dinamis. Memiliki tiga tingkat isolasi izin (safe/medium/full) dan batasan kedalaman bersarang, sub-agen tidak dapat membuat sub-agen lain, memastikan keamanan sistem. Mendukung memori persisten, penyerahan tugas, dan pelacakan kolaborasi.
 
 ---
-*This introduction is written in Butung.*
+*This introduction is written in Butung (Butung).*

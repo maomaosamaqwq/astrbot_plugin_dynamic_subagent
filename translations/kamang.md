@@ -1,6 +1,6 @@
-# Kamang (Kamang) — Dynamic SubAgent
+# Kamang — Dynamic SubAgent
 
-Dynamic SubAgent AstrBot plugin, agente sub-agent kamang. Kamang kamang (safe/medium/full) kamang, sub-agent kamang sub-agent kamang. Kamang kamang, kamang kamang, kamang kamang kamang.
+Dynamic SubAgent adalah plugin AstrBot yang memungkinkan Agent utama untuk membuat dan mengelola sub-Agent secara dinamis. Memiliki tiga tingkat isolasi izin (safe/medium/full) dan batasan kedalaman bersarang, di mana sub-Agent tidak dapat membuat sub-Agent lainnya, memastikan keamanan sistem. Mendukung memori persisten, penyerahan tugas, dan pelacakan kolaborasi.
 
 ---
 *This introduction is written in Kamang (Kamang).*

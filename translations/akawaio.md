@@ -1,6 +1,6 @@
-# Akawaio (Kapóng) — Dynamic SubAgent
+# Akawaio — Dynamic SubAgent
 
-Dynamic SubAgent AstrBot plugin, agente sub-agent akawai. Akawai akawai (safe/medium/full) akawai, sub-agent akawai sub-agent akawai. Akawai akawai, akawai akawai, akawai akawai akawai.
+Dynamic SubAgent pan AstrBot plugin hiye main Agent da sub Agent da dinamis ya maku da mengelola. Mempunyai tiga tingkat isolasi izin (safe/medium/full) dan batasan kedalaman, sub Agent tidak bisa lagi maku sub Agent lain, keamanan sistem terjamin. Mendukung memori persisten, penyerahan tugas, dan pelacakan kolaborasi.
 
 ---
 *This introduction is written in Akawaio (Akawaio).*

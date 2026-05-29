@@ -1,6 +1,6 @@
-# 卡尔比语 — Dynamic SubAgent
+# Karbi — Dynamic SubAgent
 
-Dynamic SubAgent nga AstrBot plugin jā, mā Agent sub Agent jhō jhō kō mā hō. Sō pō tsō pō (safe/medium/full) tā pō jap, sub Agent shō sub Agent mā kō, system hō pō. Jhō ingāp, jhā jhō qo jhō ya.
+Dynamic SubAgent là một plugin AstrBot cho phép Agent chính tạo và quản lý sub-Agent một cách động. Có ba cấp độ cách ly quyền hạn (safe/medium/full) và giới hạn độ sâu lồng, trong đó sub-Agent không thể tạo thêm sub-Agent khác, đảm bảo an toàn hệ thống. Hỗ trợ bộ nhớ bền vững, chuyển giao tác vụ và theo dõi hợp tác.
 
 ---
-*This introduction is written in 卡尔比语 (Karbi).*
+*This introduction is written in Karbi (Karbi).*

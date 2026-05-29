@@ -1,6 +1,6 @@
-# Oʻzbek tili Tanishtirish
+# Oʻzbek — Dynamic SubAgent
 
-OpenClaw — ochiq manbali AI yordamchi platformasi boʻlib, Telegram, Discord va WhatsApp kabi turli xabarlashish kanallariga ulanadi. U bir nechta AI modellarini qoʻllab-quvvatlaydi va vazifalarni bajarish uchun turli vositalar va koʻnikmalardan foydalana oladi. Hamjamiyat tomonidan boshqariladigan OpenClaw oʻzining aqlli yordamchisini yaratmoqchi boʻlgan har bir kishining hissasini qarshi oladi.
+Dynamic SubAgent — bu AstrBot plagini boʻlib, asosiy agentga sub-agentlarni动态 yaratish va boshqarish imkonini beradi. Uch darajali ruxsat izolyatsiyasi (safe/medium/full) va chuqurlik chegarasi mavjud, sub-agentlar boshqa sub-agentlar yarata olmaydi, bu tizim xavfsizligini taʼminlaydi. Doimiy xotira, vazifalarni oʻtkazish va hamkorlikni kuzatishni qoʻllab-quvvatlaydi.
 
 ---
-*This introduction is written in Oʻzbek tili (Uzbek).*
+*This introduction is written in Oʻzbek (Uzbek).*

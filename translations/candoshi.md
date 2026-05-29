@@ -1,6 +1,6 @@
-# Candoshi (Kandozi) — Dynamic SubAgent
+# Candoshi — Dynamic SubAgent
 
-Dynamic SubAgent AstrBot plugin ro, agente sub-agent impo impo. Impo tampari (safe/medium/full) impo, sub-agent impo tampari sub-agent. Impo tampari impo, impo tampari impo, impo tampari impo.
+Dynamic SubAgent es un plugin de AstrBot que permite al agente principal crear y gestionar sub-agentes de forma dinámica. Cuenta con tres niveles de aislamiento de permisos (safe/medium/full) y límite de profundidad de anidamiento, los sub-agentes no pueden crear otros sub-agentes, garantizando la seguridad del sistema. Soporta memoria persistente, transferencia de tareas y seguimiento de colaboración.
 
 ---
 *This introduction is written in Candoshi (Candoshi).*

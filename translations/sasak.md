@@ -1,6 +1,6 @@
 # Sasak — Dynamic SubAgent
 
-Dynamic SubAgent jari plugin AstrBot endah ngemungkinan Agent utama delék kance ngatur subAgent sacara dinamis. Kance telu tingkat isolasi (safe/medium/full) kance batas leq nested, subAgent endek tao delék subAgent malik, jaga aman sistem. Ndukung memori persisten, mindah tugas, kance palacakan kolaborasi.
+Dynamic SubAgent ne anak plugin AstrBot le lenang mepara agen utama ngawang sub-agen. Tiga tingkat izolasi perizinan (safe/medium/full) lan wates ambang ne, sub-agen ne boten dados ngawang sub-agen malih, ngawis kaamanan sistem. Ndungketin memori persisten, pindah tugas lan lacak kerja sama.
 
 ---
-*This introduction is written in Sasak.*
+*This introduction is written in Sasak (Sasak).*

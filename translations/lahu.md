@@ -1,6 +1,6 @@
-# 拉祜语 — Dynamic SubAgent
+# Lahu — Dynamic SubAgent
 
-Dynamic SubAgent nga AstrBot plugin jā, mā Agent qo sub Agent jhō jhō kō mā hō. Sō pō tsō pō (safe/medium/full) tā pō jap, sub Agent shō sub Agent mā kō, system hō pō. Jhō ingāp, jhā jhō qo jhō ya.
+Dynamic SubAgent က AstrBot plugin တစ်ခုဖြစ်ပြီး Agent အဓိကက sub-Agent များကို တက်ကြွစွာဖန်တီးပြီး စီမံခန့်ခွဲနိုင်စေပါသည်။ အဆင့်သုံးဆင့်ခွင့်ပြုချက် သီးခြားခွဲခြင်း (safe/medium/full) နှင့် အတွင်းနက်ရှိုင်းမှု ကန့်သတ်ချက်ရှိပြီး sub-Agent များက အခြား sub-Agent များကို ဖန်တီး၍မရပါ၊ စနစ်၏ လုံခြုံရေးကို အာမခံပါသည်။ အမြဲတမ်းမှတ်ဉာဏ်၊ အလုပ်လွှဲပြောင်းခြင်းနှင့် ပူးပေါင်းဆောင်ရွက်မှု ခြေရာခံခြင်းကို ပံ့ပိုးပေးပါသည်။
 
 ---
-*This introduction is written in 拉祜语 (Lahu).*
+*This introduction is written in Lahu (Lahu).*

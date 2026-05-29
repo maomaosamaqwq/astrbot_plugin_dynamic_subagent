@@ -1,6 +1,6 @@
-# Bahasa Indonesia Perkenalan
+# Indonesian — Dynamic SubAgent
 
-OpenClaw adalah platform asisten AI sumber terbuka yang terhubung ke berbagai saluran pesan seperti Telegram, Discord, dan WhatsApp. Platform ini mendukung berbagai model AI dan dapat menggunakan beragam alat dan keterampilan untuk menyelesaikan tugas. Didorong oleh komunitas, OpenClaw menyambut kontribusi dari siapa pun yang ingin membangun asisten cerdas mereka sendiri.
+Dynamic SubAgent adalah plugin AstrBot yang memungkinkan Agent utama untuk membuat dan mengelola sub-Agent secara dinamis. Memiliki tiga tingkat isolasi izin (safe/medium/full) dan batasan kedalaman bersarang, di mana sub-Agent tidak dapat membuat sub-Agent lainnya, memastikan keamanan sistem. Mendukung memori persisten, penyerahan tugas, dan pelacakan kolaborasi.
 
 ---
-*This introduction is written in Bahasa Indonesia (Indonesian).*
+*This introduction is written in Indonesian (Indonesian).*

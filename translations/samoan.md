@@ -1,6 +1,6 @@
-# Gagana Samoa Fa'atomuaga
+# Samoan — Dynamic SubAgent
 
-O le OpenClaw o se fa'avae tatala mo fesoasoani AI e fa'afeso'ota'i i ala 'ese'ese o fe'au e pei o Telegram, Discord ma WhatsApp. E lagolagoina le tele o fa'ata'ita'iga AI ma e mafai ona fa'aogaina meafaigaluega ma tomai 'ese'ese e fa'atino ai galuega. E ta'ita'ia e le nu'u, e talia e le OpenClaw saoaoga mai tagata uma o lo'o fia fausia a latou lava fesoasoani atamai.
+O le Dynamic SubAgent o se plugin a AstrBot e mafai ai e le agenti pule ona fai ma fa'atonutonu sub-agenti i se ala fa'atino. E i ai le tolu tulaga o le fa'atagaina (safe/medium/full) ma le tulaga o le loloto, e le mafai e sub-agenti ona fai ma sub-agenti fou, e fa'amautinoa ai le puipuiga o le sistema. E lagolagoina le manatu tūmau, le ave'esea o galuega ma le siakiina o le galulue fa'atasi.
 
 ---
-*This introduction is written in Gagana Samoa (Samoan).*
+*This introduction is written in Samoan (Samoan).*

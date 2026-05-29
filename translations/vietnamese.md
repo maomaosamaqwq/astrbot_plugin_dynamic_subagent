@@ -1,6 +1,6 @@
-# Tiếng Việt Giới thiệu
+# Tiếng Việt — Dynamic SubAgent
 
-OpenClaw là một nền tảng trợ lý AI mã nguồn mở, có thể kết nối với nhiều kênh tin nhắn khác nhau như Telegram, Discord và WhatsApp. Nó hỗ trợ nhiều mô hình AI và có thể sử dụng các công cụ và kỹ năng đa dạng để hoàn thành nhiệm vụ. Được điều hành bởi cộng đồng, OpenClaw hoan nghênh sự đóng góp từ tất cả những ai muốn xây dựng trợ lý thông minh của riêng mình.
+Dynamic SubAgent là một plugin của AstrBot, cho phép Agent chính tạo và quản lý các Sub-Agent một cách动态. Plugin có ba cấp độ cô lập quyền (safe/medium/full) và giới hạn độ sâu lồng, Sub-Agent không thể tạo thêm Sub-Agent khác, đảm bảo an toàn hệ thống. Hỗ trợ bộ nhớ持久, chuyển giao nhiệm vụ và theo dõi sự cộng tác.
 
 ---
 *This introduction is written in Tiếng Việt (Vietnamese).*

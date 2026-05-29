@@ -1,6 +1,6 @@
 # Banggai — Dynamic SubAgent
 
-Dynamic SubAgent bati plugin AstrBot umba nopolensei Agent utama mpobaba' mpo'aturi subAgent dinamik. Bo tolu tingkato isolasi (safe/medium/full) bo batesa kalolongan nested, subAgent da'a mpobaba' subAgent pomo, mpakajaga kamajaan sistem. Nopolensei memori persisten, mpalele tugas, bo palacakan kolaborasi.
+Dynamic SubAgent adalah plugin AstrBot yang membolehkan agen utama membuat dan mengelola sub-agen secara dinamis. Memiliki tiga tingkat isolasi izin (safe/medium/full) dan batasan kedalaman bersarang, sub-agen tidak dapat membuat sub-agen lain, memastikan keamanan sistem. Mendukung memori persisten, penyerahan tugas, dan pelacakan kolaborasi.
 
 ---
-*This introduction is written in Banggai.*
+*This introduction is written in Banggai (Banggai).*

@@ -1,6 +1,6 @@
-# ⵜⴰⵎⴰⵣⵉⵖⵜ ⴰⵣⵓⵍ
+# ⵜⴰⵎⴰⵣⵉⵖⵜ — Dynamic SubAgent
 
-OpenClaw ⵉⴳⴰ ⵢⴰⵏ ⵓⵏⵖⵎⵉⵙ ⵓⵔ ⵉⵙⵖⵍⵉⵏ ⵏ AI ⴰⵔ ⵉⵜⵜⵎⵓⵏⴰⵢ ⵉ ⵉⵡⴰⵏⵏⵓⵜⵏ ⵏ ⵜⴱⵔⴰⵜⵉⵏ ⴰⵎ Telegram, Discord, WhatsApp. ⵉⵜⵜⵓⵙⵙⴰⵏ ⵙ ⵓⵙⵓⵔⵣⵓ ⵏ ⵎⵏⵏⴰⵡ ⵏ ⴰⵏⴰⵡⵏ AI ⵉⵣⵎⵔ ⴰⴷ ⵢⴰⵙ ⵅⴼ ⵉⵎⴰⵙⵙⵏ ⴷ ⵜⵉⵏⵉⵡⵉⵏ ⵏ ⵓⴱⵔⵉⴷ. ⵜⵏⴰⵖⴰⵜ ⵏ ⵜⴰⵖⴰⵔⴰⵙⵜ, OpenClaw ⵉⵙⴼⵙⴰ ⵉ ⴰⴷ ⵢⵍⵍⵉ ⵉⵍⵍⴰⵏ ⵉ ⴰⵏⵔⴰⵔ ⵏ ⴰⵢⵏⵉⵜ ⵏⵏⵙ.
+Dynamic SubAgent d AstrBot plugin ay igellan agente agejdan ad isɣar udiɣ ad isefk sub-agents s tarrayt tamahalt. Kraḍ n iswiren n umsuddes n tsirag (safe/medium/full) d tilist n fond, sub-agents ur zmiren ara ad sɣarn sub-agents niḍen, d ayen yettḥattmen taɣellist n unagraw. Itteddu ɛla ḥfiẓa daɣen, aswel n tiwuriwin d umtteq n tmekta.
 
 ---
 *This introduction is written in ⵜⴰⵎⴰⵣⵉⵖⵜ (Tamazight).*

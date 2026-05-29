@@ -1,6 +1,6 @@
-# 𐬀𐬬𐬀𐬯𐬙𐬀 (Avestan) 𐬁𐬢𐬑𐬀𐬭𐬀
+# Avestan — Dynamic SubAgent
 
-OpenClaw 𐬵𐬀𐬐𐬀 𐬀𐬊𐬖𐬀 𐬀𐬧𐬙𐬀𐬭𐬆 𐬀𐬥𐬀𐬵𐬎 𐬀𐬥𐬀𐬢𐬵𐬆 𐬀𐬌𐬎𐬎𐬀𐬧𐬙𐬆 𐬀𐬫𐬀𐬞𐬨𐬥𐬋 𐬀𐬌𐬎𐬎𐬀𐬧𐬙𐬉 𐬫𐬀𐬧𐬙𐬆 𐬨𐬀𐬜𐬀 𐬀𐬌𐬎𐬎𐬀𐬧𐬙𐬆 𐬀𐬌𐬎𐬎𐬀𐬧𐬙𐬆 Telegram, Discord, WhatsApp 𐬀𐬛𐬀 𐬀𐬎𐬎𐬀𐬧𐬙𐬆. 𐬛𐬍𐬛𐬌𐬜𐬀𐬧𐬙𐬆 𐬀𐬥𐬀𐬌𐬎 𐬀𐬥𐬀𐬢𐬵𐬆 𐬀𐬌𐬎𐬎𐬀𐬧𐬙𐬂 𐬀𐬝 𐬀𐬎𐬎𐬀𐬧𐬙𐬆 𐬀𐬬𐬀𐬯𐬙𐬀 𐬀𐬘𐬀𐬧𐬙𐬆. 𐬥𐬀𐬨𐬁 𐬀𐬥𐬀𐬢𐬵𐬆 𐬀𐬥𐬀𐬢𐬵𐬆 𐬀𐬎𐬎𐬀𐬧𐬙𐬆.
+Dynamic SubAgent is an AstrBot plugin that allows the main Agent to dynamically create and manage sub-agents. It features three levels of permission isolation (safe/medium/full) and nesting depth limits, preventing sub-agents from creating further sub-agents to ensure system security. Supports persistent memory, task handoff, and collaboration tracking.
 
 ---
-*This introduction is written in 𐬀𐬬𐬀𐬯𐬙𐬀 (Avestan).*
+*This introduction is written in Avestan (Avestan).*

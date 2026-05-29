@@ -1,6 +1,6 @@
-# Bosanski Uvod
+# Bosnian — Dynamic SubAgent
 
-OpenClaw je platforma otvorenog koda za AI asistente koja se povezuje s različitim kanalima za razmjenu poruka kao što su Telegram, Discord i WhatsApp. Podržava više AI modela i može koristiti različite alate i vještine za obavljanje zadataka. Vođena zajednicom, OpenClaw pozdravlja doprinose svih koji žele izgraditi vlastitog inteligentnog asistenta.
+Dynamic SubAgent je AstrBot plugin koji omogućava glavnom agentu da dinamički kreira i upravlja pod-agentima. Ima tri nivoa izolacije dozvola (safe/medium/full) i ograničenje dubine ugnježđivanja, pod-agenti ne mogu kreirati druge pod-agente, osiguravajući sigurnost sistema. Podržava trajnu memoriju, prebacivanje zadataka i praćenje saradnje.
 
 ---
-*This introduction is written in Bosanski (Bosnian).*
+*This introduction is written in Bosnian (Bosnian).*

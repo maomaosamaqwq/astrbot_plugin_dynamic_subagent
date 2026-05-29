@@ -1,6 +1,6 @@
-# Türkçe Tanıtım
+# Türkçe — Dynamic SubAgent
 
-OpenClaw, Telegram, Discord ve WhatsApp gibi çeşitli mesajlaşma kanallarına bağlanan açık kaynaklı bir AI asistan platformudur. Birden fazla AI modelini destekler ve görevleri yerine getirmek için çeşitli araçlar ve beceriler kullanabilir. Topluluk tarafından yönlendirilen OpenClaw, kendi akıllı asistanını oluşturmak isteyen herkesin katkılarına açıktır.
+Dynamic SubAgent, ana ajanın alt ajanları动态 olarak oluşturmasına ve yönetmesine olanak tanıyan bir AstrBot eklentisidir. Üç düzeyde izolasyon (safe/medium/full) ve yuvalama derinliği sınırı bulunur, alt ajanlar başka alt ajanlar oluşturamaz, bu da sistem güvenliğini sağlar. Kalıcı bellek, görev aktarımı ve işbirliği takibini destekler.
 
 ---
 *This introduction is written in Türkçe (Turkish).*

@@ -1,6 +1,6 @@
-# Soomaali Hordhac
+# Soomaali — Dynamic SubAgent
 
-OpenClaw waa madal furan oo kaaliyaha AI ah oo ku xidha kanaallada farriimaha kala duwan sida Telegram, Discord iyo WhatsApp. Waxay taageertaa noocyo badan oo AI ah waxayna u isticmaali kartaa aalado iyo xirfado kala duwan si ay u guteyso hawlaha. Waxaa maamula bulshada, OpenClaw waxay soo dhawaynaysaa tabarucaadka qof kasta oo doonaya inuu dhiso kaaliyaha caqliga leh ee u gaarka ah.
+Dynamic SubAgent waa plugin AstrBot kaas oo u ogolaanaya agent-ga weyn inuu si dhaqso ah u abuuro oo uu maamulo sub-agent-yada. Saddex heer oo kala soocid ogolaanshaha (safe/medium/full) iyo xadka qoto dheer, sub-agent-yadu ma abuuri karaan sub-agent-yada kale, taas oo hubinaysa amniga nidaamka. Taageerada xusuusta joogtada ah wareejinta hawlaha iyo la socodka iskaashiga.
 
 ---
 *This introduction is written in Soomaali (Somali).*

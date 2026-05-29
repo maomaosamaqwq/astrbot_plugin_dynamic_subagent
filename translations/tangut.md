@@ -1,6 +1,6 @@
-# 𗼇𗟲 (Tangut) — Dynamic SubAgent
+# 西夏文 — Dynamic SubAgent
 
-𘕕𘖕𘐔𘋨Dynamic SubAgent𘘤𘐕 AstrBot 𘗶𘏣𘊝，𘗶𘒣𘊝𘋙𘏳𘋗𘗈𘒣𘊝𘋙𘐿𘐠𘔱𘁎𘗽𘆁𘆮𘊝𘋙𘏳𘋗𘗈𘒣𘊝𘋙𘐿。𘈪𘋨𘋬𘕕𘕝𘆃𘕝（safe/medium/full）𘗐𘋨𘕐𘉐𘓳𘉐𘔱𘁎，𘗽𘆁𘆮𘊝𘋙𘏳𘋗𘗈𘒣𘊝𘋙𘐿𘗽𘆁𘆮𘊝𘋙𘏳𘋗𘗈𘒣𘊝𘋙𘐿𘘝𘕕𘋨。𘖗𘕝𘆃𘕝𘘩𘕝𘘲𘋗，𘗺𘖕𘈘𘐠，𘗐𘋨𘝷𘕝𘗐𘋨𘘝𘘲。
+Dynamic SubAgent 是一个 AstrBot 插件，让主 Agent 可以动态创建和管理子 Agent。具备三级权限隔离（safe/medium/full）和嵌套深度限制，子 Agent 无法再创建子 Agent，确保系统安全。支持持久化记忆、任务移交和协作追踪。
 
 ---
-*This introduction is written in Tangut (Tangut).*
+*This introduction is written in 西夏文 (Tangut).*

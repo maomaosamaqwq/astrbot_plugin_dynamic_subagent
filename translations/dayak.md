@@ -1,6 +1,6 @@
 # Dayak — Dynamic SubAgent
 
-Dynamic SubAgent tuah plugin AstrBot nang meri kuasa Agent utama bebaas buat maatur subAgent dinamik. Bisi telu tingkat isolasi (safe/medium/full) enggau batas dalam nested, subAgent enda ulih ngaga subAgent agi, ngaga aman sistem. Nyukung memori persisten, mindah tugas, enggau palacakan kolaborasi.
+Dynamic SubAgent adalah plugin AstrBot yang memungkinkan agen utama membuat dan mengelola sub-agen secara dinamis. Memiliki tiga tingkat isolasi izin (safe/medium/full) dan batasan kedalaman bersarang, sub-agen tidak dapat membuat sub-agen lain, memastikan keamanan sistem. Mendukung memori persisten, penyerahan tugas, dan pelacakan kolaborasi.
 
 ---
-*This introduction is written in Dayak.*
+*This introduction is written in Dayak (Dayak).*

@@ -1,6 +1,6 @@
-# Thuɔŋjäŋ Wëlëth
+# Dinka — Dynamic SubAgent
 
-OpenClaw ee cïlë̈k tëkpinyic AI ku ëyë lɔ̈t thiäk cɔl Telegram, Discord ku WhatsApp. Yï tïŋ tëdë ai model AI cï kaan thɛ̈r, ku ëyë lɔ̈k bɛ̈c ku kä kë cï thɛ̈kic. Yïn cï yökë raan bï raan käc wën cï ë ku etɛ̈n OpenClaw, yï yök cïnë tïpë raan bï raan tïŋkä ye yök cï raan aköl cï raan piny.
+Dynamic SubAgent ke AstrBot plugin ke nhok ka agent këc ën bëëm ëë cï ka sub-agent ëm ën lok ën diit. Kë tëk tëk tëk permission isolation (safe/medium/full) ëk batasan kedalaman, sub-agent ëë cï ëm sub-agent tök, ka keamanan sistem ën ëë. Nyok memori persisten, penyerahan tugas ëk pelacakan kolaborasi.
 
 ---
-*This introduction is written in Thuɔŋjäŋ (Dinka).*
+*This introduction is written in Dinka (Dinka).*

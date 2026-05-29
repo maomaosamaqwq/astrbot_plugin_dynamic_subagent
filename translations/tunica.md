@@ -1,6 +1,6 @@
 # Tunica — Dynamic SubAgent
 
-Dynamic SubAgent ɛli AstrBot wikihti, ʔu ɛli tihku tɛhku hɛti ɛhtu wishta ɛkɛhču šina wiša. ʔu ʔalihkihči kaskihči ɛli (safe/medium/full) kuyahtu, taš ʔu wiša talikahči ʔu ʔalikahči tɛhkuhči ɛkɛhču šina. Wihku ɛlihki tɛhkuhči talahtiku, wihkihču wiluhtiku, taš ʔuwɛ ɛhtu tikahčihtiku.
+Dynamic SubAgent is an AstrBot plugin that allows the main agent to dynamically create and manage sub-agents. It features three levels of permission isolation (safe/medium/full) and nesting depth limits, preventing sub-agents from creating further sub-agents, ensuring system security. Supports persistent memory, task handoff, and collaboration tracking.
 
 ---
 *This introduction is written in Tunica (Tunica).*

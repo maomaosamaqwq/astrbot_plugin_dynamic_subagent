@@ -1,6 +1,6 @@
-# Brezhoneg Kinnig
+# Breton — Dynamic SubAgent
 
-Unn platform digor eo OpenClaw evit skoazellerien AI a gemm liamm gant kanennoù kemennadennoù disheñvel evel Telegram, Discord ha WhatsApp. Skorañ a ra meur a vodell AI hag implijout a c'hall ostilhoù ha barregezhioù liesseurt evit seveniñ trevelloù. Kaset gant ar gumuniezh, degemer a ra OpenClaw degasadennoù an holl a fell dezho sevel o skoazeller fin dezho o-unan.
+Dynamic SubAgent a zo ur plugenn AstrBot a aotre ar bragent digoret da grouiñ ha meriañ sub-agentien dre zegouezh. Tri live aotreañ distagadenn (safe/medium/full) ha bevennoù donder ar c'houezhiañ a zo, sub-agentien n'hallont ket krouiñ sub-agentien all, a suraat surentez ar reizhiad. Skor a ra memorio peurzalc'hus, treuzkas trevelloù ha heuliañ kenurzhiadur.
 
 ---
-*This introduction is written in Brezhoneg (Breton).*
+*This introduction is written in Breton (Breton).*

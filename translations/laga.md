@@ -1,6 +1,6 @@
-# 拉加语 — Dynamic SubAgent
+# Laga — Dynamic SubAgent
 
-Dynamic SubAgent nga AstrBot plugin jā, mā Agent sub Agent jhō jhō kō mā hō. Sō pō tsō pō (safe/medium/full) tā pō, sub Agent shō sub Agent mā kō, system hō. Jhō ingāp, jhā jhō qo jhō ya.
+Dynamic SubAgent adalah plugin AstrBot yang memungkinkan Agent utama untuk membuat dan mengelola sub-Agent secara dinamis. Memiliki tiga tingkat isolasi izin (safe/medium/full) dan batasan kedalaman bersarang, di mana sub-Agent tidak dapat membuat sub-Agent lainnya, memastikan keamanan sistem. Mendukung memori persisten, penyerahan tugas, dan pelacakan kolaborasi.
 
 ---
-*This introduction is written in 拉加语 (Laga).*
+*This introduction is written in Laga (Laga).*
