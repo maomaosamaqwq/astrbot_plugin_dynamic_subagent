@@ -42,7 +42,9 @@ _SAFE_TOOLS = frozenset({
 
 # medium 权限排除的工具黑名单
 _MEDIUM_BLOCKED = frozenset({
-    "shell_exec", "local_python_exec", "execute_shell", "run_python",
+    "astrbot_execute_shell",
+    "astrbot_execute_ipython",
+    "astrbot_execute_python",
 })
 
 
@@ -169,10 +171,14 @@ class DynamicSubAgentPlugin(Star):
         sub_tools = ToolSet()
         full_mgr = self.context.provider_manager.llm_tools
         
-        # 调试：打印所有可用工具名
-        tool_names = [t.name for t in full_mgr.func_list]
-        logger.info(f"DynamicSubAgent: 可用工具列表 ({len(tool_names)}个): {tool_names}")
+        # 调试：打印所有可用工具名（含内置工具）
+        plugin_mcp_names = [t.name for t in full_mgr.func_list]
+        builtin_tools = full_mgr.iter_builtin_tools()
+        builtin_names = [t.name for t in builtin_tools]
+        logger.info(f"DynamicSubAgent: 插件/MCP工具 ({len(plugin_mcp_names)}个): {plugin_mcp_names}")
+        logger.info(f"DynamicSubAgent: 内置工具 ({len(builtin_names)}个): {builtin_names}")
         
+        # 所有人的基础工具：来自 func_list（插件注册 + MCP）
         if permission_level == "safe":
             for t in full_mgr.func_list:
                 if t.name in _SAFE_TOOLS:
@@ -181,8 +187,15 @@ class DynamicSubAgentPlugin(Star):
             for t in full_mgr.func_list:
                 if t.name not in _MEDIUM_BLOCKED:
                     sub_tools.add_tool(t)
+            # medium 追加文件操作类内置工具
+            for t in builtin_tools:
+                if t.name not in _MEDIUM_BLOCKED:
+                    sub_tools.add_tool(t)
         else:
             for t in full_mgr.func_list:
+                sub_tools.add_tool(t)
+            # full 追加全部内置工具
+            for t in builtin_tools:
                 sub_tools.add_tool(t)
         
         selected_names = [t.name for t in sub_tools.func_list]
