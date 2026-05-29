@@ -1,6 +1,6 @@
-# Xavante (A'uwẽ) — Dynamic SubAgent
+# Xavante — Dynamic SubAgent
 
-Dynamic SubAgent AstrBot plugin, agente sub-agent tsi. Tsi tsi (safe/medium/full) tsi, sub-agent tsi sub-agent tsi hã. Tsi hã, tsi hã, tsi hã hã.
+Dynamic SubAgent é um plugin do AstrBot que permite ao agente principal criar e gerenciar sub-agentes dinamicamente. Possui três níveis de isolamento de permissões (safe/medium/full) e limite de profundidade de aninhamento, impedindo que sub-agentes criem outros sub-agentes, garantindo a segurança do sistema. Suporta memória persistente, transferência de tarefas e rastreamento de colaboração.
 
 ---
 *This introduction is written in Xavante (Xavante).*

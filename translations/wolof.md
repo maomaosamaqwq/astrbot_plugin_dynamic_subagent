@@ -1,6 +1,6 @@
-# Wolof Tawfeex
+# Wolof — Dynamic SubAgent
 
-OpenClaw tolluwaay bu ubbeeku la ci jariñu AI bu gën a lëkkaloo ak dunnu yoonu xibaar yu niroo ay Telegram, Discord ak WhatsApp. Dafay màggal mbirum modeli AI yu bari te manees na ci jëfandikoo ay jumtukaay ak xarala yu bari ngir def ay liggéey. Kiiteelu askan wi, OpenClaw dañuy gënu ci ndawal kuy sopp ndijji ji ñu bëgga jëfandikoo jariñu bu xel mu bari.
+Dynamic SubAgent dafa plugin AstrBot buy jox ndox agente bu njëkk ngir def ak gërëm sub-agents. Ñaari tànn dafa njëkk permission (safe/medium/full) ak limit digëntu, sub-agents kenn du mana def sub-agents yeneen, dafa wóor sécurité système bi. Dafa takk mémoire persistente, transfert tâche ak suivi collaboration.
 
 ---
 *This introduction is written in Wolof (Wolof).*

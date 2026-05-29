@@ -1,6 +1,6 @@
-# Dutch — Dynamic SubAgent
+# 荷兰语 (Dutch) — Dynamic SubAgent
 
-Dynamic SubAgent is een AstrBot-plugin waarmee de hoofdagent dynamisch sub-agenten kan aanmaken en beheren. Heeft drie niveaus van machtigingsisolatie (safe/medium/full) en een limiet voor de nestingsdiepte, sub-agenten kunnen geen andere sub-agenten aanmaken, waardoor de systeemveiligheid wordt gewaarborgd. Ondersteunt persistent geheugen, taakoverdracht en samenwerkingstracering.
+Dynamic SubAgent is een AstrBot-plugin waarmee de hoofd-Agent dynamisch sub-Agents kan aanmaken en beheren. Het beschikt over drie niveaus van machtigingsisolatie (safe/medium/full) en beperkingen op de nestingsdiepte; sub-Agents kunnen geen nieuwe sub-Agents aanmaken, waardoor de systeemveiligheid wordt gewaarborgd. De plugin ondersteunt persistente geheugen, taakoverdracht en samenwerkingstracking.
 
 ---
-*This introduction is written in Dutch (Dutch).*
+*This introduction is written in 荷兰语 (Dutch).*

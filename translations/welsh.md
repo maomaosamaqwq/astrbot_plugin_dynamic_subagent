@@ -1,6 +1,6 @@
-# Cymraeg Cyflwyniad
+# Cymraeg — Dynamic SubAgent
 
-Mae OpenClaw yn blatfform cynorthwy-ydd AI ffynhonnell agored sy'n cysylltu â gwahanol sianeli negeseua fel Telegram, Discord a WhatsApp. Mae'n cefnogi nifer o fodelau AI a gall ddefnyddio amrywiol offer a sgiliau i gyflawni tasgau. Wedi'i yrru gan y gymuned, mae OpenClaw yn croesawu cyfraniadau gan bawb sydd am adeiladu eu cynorthwy-ydd deallus eu hunain.
+Dynamic SubAgent yn ategyn AstrBot sy'n caniatáu i'r prif asiant greu a rheoli is-asiantiaid yn ddeinamig. Mae'n cynnwys tri lefel o wahanu caniatâd (safe/medium/full) a chyfyngiad dyfnder nythu, ni all is-asiantiaid greu is-asiantiaid pellach, gan sicrhau diogelwch y system. Yn cefnogi cof parhaol, trosglwyddo tasgau a thracio cydweithrediad.
 
 ---
 *This introduction is written in Cymraeg (Welsh).*

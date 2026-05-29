@@ -1,6 +1,6 @@
 # Wolio — Dynamic SubAgent
 
-Dynamic SubAgent iami plugin AstrBot umba nopogau Agent utama mpobua mpoaturi subAgent dinamik. Nomie talu tingka isolasi (safe/medium/full) nomie batasa kalola nested, subAgent te'a mpobua subAgent olu, nopojaga kamaja sistem. Nopogau memori persisten, nopalele tugas, nomie palacakan kolaborasi.
+Dynamic SubAgent iyo plugin AstrBot te mbokalengka agen utama mowadahi wowali sub-agen. Tiga tingkat izolasi perizinan (safe/medium/full) no wates ambang, sub-agen no mowadahi sub-agen lawino, mowali kaamanan sistem. Ndungketin memori persisten, pindah tugas no lacak kerja sama.
 
 ---
-*This introduction is written in Wolio.*
+*This introduction is written in Wolio (Wolio).*
