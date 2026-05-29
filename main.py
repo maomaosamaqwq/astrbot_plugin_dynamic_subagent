@@ -45,7 +45,7 @@ _MAX_SPAWN = 10
 _MAX_TRACE = 50
 
 
-@register(name="dynamic_subagent", desc="让 AI 动态创建和管理子 Agent", author="maomaosamaqwq", version="0.5.2")
+@register(name="dynamic_subagent", desc="让 AI 动态创建和管理子 Agent", author="maomaosamaqwq", version="0.5.3")
 class DynamicSubAgentPlugin(Star):
     def __init__(self, context: Context, config: dict = None):
         super().__init__(context)
@@ -61,7 +61,7 @@ class DynamicSubAgentPlugin(Star):
     # ── Lifecycle ──
 
     async def initialize(self):
-        logger.info("DynamicSubAgent v0.5.2 已初始化")
+        logger.info("DynamicSubAgent v0.5.3 已初始化")
 
     async def terminate(self):
         logger.info("DynamicSubAgent 已停止")
@@ -131,7 +131,7 @@ class DynamicSubAgentPlugin(Star):
         tool_mgr.remove_func(f"transfer_to_{name}")
 
     def _make_handoff_handler(self, cfg: SubAgentConfig):
-        async def handler(task: str):
+        async def handler(event, task: str = ""):
             return (
                 f"任务已转交给 [{cfg.name}]。\n"
                 f"子 Agent 指令: {cfg.instruction}\n"

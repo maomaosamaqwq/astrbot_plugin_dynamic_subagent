@@ -1,6 +1,6 @@
 name: dynamic_subagent
 author: maomaosamaqwq
-version: 0.5.2
+version: 0.5.3
 description: 让 AI 可以通过 tool call 动态创建和管理子 Agent
 repo: https://github.com/maomaosamaqwq/astrbot_plugin_dynamic_subagent
 
