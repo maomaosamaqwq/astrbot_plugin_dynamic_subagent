@@ -15,6 +15,14 @@
 
 ---
 
+**🌐 其他语言 / Other Languages:**
+
+[English](translations/en.md) | [日本語](translations/ja.md) | [한국어](translations/ko.md) | [Español](translations/es.md) | [Français](translations/fr.md) | [Deutsch](translations/de.md) | [Русский](translations/ru.md) | [العربية](translations/ar.md) | [Português](translations/pt.md)
+
+> 📖 更多语言翻译？使用 [Google Translate](https://translate.google.com/translate?sl=zh-CN&tl=en&u=https://github.com/maomaosamaqwq/astrbot_plugin_dynamic_subagent/blob/master/README.md) 自动翻译本页
+
+---
+
 # 🐾 Dynamic SubAgent
 
 [![Version](https://img.shields.io/github/v/release/maomaosamaqwq/astrbot_plugin_dynamic_subagent)](https://github.com/maomaosamaqwq/astrbot_plugin_dynamic_subagent/releases)
