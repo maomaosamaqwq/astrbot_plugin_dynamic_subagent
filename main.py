@@ -10,8 +10,6 @@ from astrbot.api.event import AstrMessageEvent, filter
 from astrbot.api.star import Context, Star, PluginKVStoreMixin, register
 from astrbot.core.agent.agent import Agent
 from astrbot.core.agent.handoff import HandoffTool
-from astrbot.core.astr_agent_context import AstrAgentContext
-from astrbot.core.message.message_event_result import MessageChain
 from astrbot.core.provider.register import llm_tools
 from astrbot.core import logger
 
@@ -570,7 +568,7 @@ class DynamicSubAgentPlugin(Star, PluginKVStoreMixin):
                 isinstance(f, HandoffTool) and f.name == a.tool_name
                 for f in llm_tools.func_list
             )
-            status = "1. 可用" if tool_registered else "0. 未注册"
+            status = "[可用]" if tool_registered else "[未注册]"
             lines.append(
                 f"- **{a.name}** (`{a.agent_id}`) {status}\n"
                 f"  - 生命周期: {a.lifecycle} | 权限: {a.permission_level}\n"
