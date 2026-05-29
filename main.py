@@ -247,10 +247,12 @@ class DynamicSubAgentPlugin(Star):
         system_parts.append("请根据任务使用合适的工具完成工作。")
         system_prompt = "\n\n".join(system_parts)
 
-        # 标记子 Agent 嵌套深度，用于 spawn_agent 深度限制
-        depth = getattr(event, '_sub_agent_depth', 0) + 1
-        setattr(event, '_sub_agent_depth', depth)
-        logger.info(f"DynamicSubAgent: [{cfg.name}] 执行深度={depth}")
+        # 子 Agent 嵌套深度管理：在子 Agent 执行范围内递增深度
+        # 子 Agent 执行完毕后恢复主 Agent 的原始深度（避免全局累加）
+        parent_depth = getattr(event, '_sub_agent_depth', 0)
+        child_depth = parent_depth + 1
+        setattr(event, '_sub_agent_depth', child_depth)
+        logger.info(f"DynamicSubAgent: [{cfg.name}] 父深度={parent_depth}, 执行深度={child_depth}")
 
         llm_resp = await self.context.tool_loop_agent(
             event=event,
@@ -260,6 +262,10 @@ class DynamicSubAgentPlugin(Star):
             tools=sub_tools,
         )
         result_text = llm_resp.completion_text if llm_resp else "(无返回结果)"
+
+        # 恢复父 Agent 的深度计数
+        setattr(event, '_sub_agent_depth', parent_depth)
+        logger.info(f"DynamicSubAgent: [{cfg.name}] 执行完毕，恢复深度={parent_depth}")
 
         # 保存到上下文历史
         if cfg.id not in self._agent_contexts:
