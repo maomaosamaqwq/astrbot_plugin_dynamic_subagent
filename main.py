@@ -208,14 +208,15 @@ class DynamicSubAgentPlugin(Star):
             for t in builtin_tools:
                 sub_tools.add_tool(t)
         
-        # 限制子 Agent 再创建子 Agent 的深度（主 Agent 可正常 spawn）
+        # 子 Agent 工具集强制移除 spawn/delete 工具（主 Agent 深度=0 不受限）
         caller_depth = getattr(event, '_sub_agent_depth', 0)
         if caller_depth >= 3:
-            # 深度 >= 3，移除 spawn/delete/clear 工具
-            spawn_ban = {"spawn_agent", "delete_agent", "clear_agent_context", "show_collaboration_report"}
-            sub_tools.func_list = [t for t in sub_tools.func_list if t.name not in spawn_ban]
-            if "spawn_agent" in [t.name for t in sub_tools.func_list]:
-                logger.info(f"DynamicSubAgent: 子 Agent 深度已达 {caller_depth}，移除创建/销毁工具")
+            # 任何子 Agent（depth>=1）都不能 spawn 或销毁 Agent
+            child_ban = {"spawn_agent", "delete_agent", "clear_agent_context", "show_collaboration_report"}
+            sub_tools.func_list = [t for t in sub_tools.func_list if t.name not in child_ban]
+            logger.info(f"DynamicSubAgent: 子 Agent 深度={caller_depth}，已移除 spawn/delete 工具")
+        if caller_depth >= 3:
+            logger.warning(f"DynamicSubAgent: 子 Agent 深度已达 {caller_depth}（已达上限）")
         
         selected_names = [t.name for t in sub_tools.func_list]
         logger.info(f"DynamicSubAgent: [{permission_level}] 已选工具 ({len(selected_names)}个): {selected_names}")
@@ -333,10 +334,10 @@ class DynamicSubAgentPlugin(Star):
         if perm_rank.get(permission_level, 0) > perm_rank.get(caller_perm, 0):
             return f"权限不足：无法创建 {permission_level} 权限的子 Agent（当前权限: {caller_perm}）"
 
-        # 深度限制：子 Agent 最多嵌套 3 层
+        # 子 Agent 无权创建子 Agent（主 Agent 深度=0 不受限）
         caller_depth = getattr(event, '_sub_agent_depth', 0)
-        if caller_depth >= 3:
-            return f"子 Agent 嵌套深度已达上限（{caller_depth}），无法再创建新的子 Agent"
+        if caller_depth >= 1:
+            return f"子 Agent 无权创建新子 Agent（当前深度={caller_depth}）"
 
         if self._find_agent_by_name(name):
             return f"已有同名子 Agent [{name}]，请使用不同的名称"
