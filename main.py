@@ -210,7 +210,7 @@ class DynamicSubAgentPlugin(Star):
         
         # 子 Agent 工具集强制移除 spawn/delete 工具（主 Agent 深度=0 不受限）
         caller_depth = getattr(event, '_sub_agent_depth', 0)
-        if caller_depth >= 3:
+        if caller_depth >= 1:
             # 任何子 Agent（depth>=1）都不能 spawn 或销毁 Agent
             child_ban = {"spawn_agent", "delete_agent", "clear_agent_context", "show_collaboration_report"}
             sub_tools.func_list = [t for t in sub_tools.func_list if t.name not in child_ban]
