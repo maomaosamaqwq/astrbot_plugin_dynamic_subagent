@@ -45,14 +45,15 @@ _MAX_SPAWN = 10
 _MAX_TRACE = 50
 
 
-@register(name="dynamic_subagent", desc="让 AI 动态创建和管理子 Agent", author="maomaosamaqwq", version="0.5.3")
+@register(name="dynamic_subagent", desc="让 AI 动态创建和管理子 Agent", author="maomaosamaqwq", version="0.5.4")
 class DynamicSubAgentPlugin(Star):
     def __init__(self, context: Context, config: dict = None):
         super().__init__(context)
         self._ctx = context
         self._cfg = config or {}
         self._store = SubAgentStore()
-        self._spawn_count = 0
+        # Bug #5 fix: 改用 set 记录已创建的 agent id，删除时同步移除
+        self._spawned_ids: set[str] = set()
         self._traces: dict[str, list[dict]] = {}
 
         self._load_store()
@@ -61,7 +62,7 @@ class DynamicSubAgentPlugin(Star):
     # ── Lifecycle ──
 
     async def initialize(self):
-        logger.info("DynamicSubAgent v0.5.3 已初始化")
+        logger.info("DynamicSubAgent v0.5.4 已初始化")
 
     async def terminate(self):
         logger.info("DynamicSubAgent 已停止")
@@ -107,7 +108,6 @@ class DynamicSubAgentPlugin(Star):
 
     def _register_handoff_tool(self, cfg: SubAgentConfig):
         tool_name = f"transfer_to_{cfg.name}"
-        # 通过 self.context 注册工具，确保 handler_module_path 被正确设置
         tool_mgr = self.context.provider_manager.llm_tools
         tool_mgr.add_func(
             tool_name,
@@ -118,13 +118,6 @@ class DynamicSubAgentPlugin(Star):
             f"将任务转交给子 Agent [{cfg.name}] 处理。{cfg.description or '无描述'}",
             self._make_handoff_handler(cfg),
         )
-        # 给工具打上 handler_module_path 标记，确保插件工具可见性判断通过
-        tool = tool_mgr.get_func(tool_name)
-        if tool:
-            # AstrBot add_llm_tools 会从 __module__ 提取 "plugins.<name>.main" 格式
-            # 我们的闭包 handler.__module__ 是 __name__（即 "main"），解析不对
-            # 直接设为 self.__module__，让 add_llm_tools 的逻辑能正确匹配到插件
-            tool.handler_module_path = __name__
 
     def _unregister_handoff_tool(self, name: str):
         tool_mgr = self.context.provider_manager.llm_tools
@@ -152,7 +145,6 @@ class DynamicSubAgentPlugin(Star):
 
     # ── LLM Tools ──
 
-    @filter.llm_tool()
     @filter.llm_tool()
     async def spawn_agent(
         self,
@@ -185,7 +177,8 @@ class DynamicSubAgentPlugin(Star):
             model(string): 使用的模型名，不传则继承主 Agent
             persistent(boolean): 是否持久化（跨重启），默认 false
         """
-        if self._spawn_count >= _MAX_SPAWN:
+        # Bug #5 fix: 用 len(_spawned_ids) 判断配额，非 _spawn_count
+        if len(self._spawned_ids) >= _MAX_SPAWN:
             return f"已达到子 Agent 创建上限（{_MAX_SPAWN}），无法创建"
 
         if not name or not name.isidentifier():
@@ -213,11 +206,21 @@ class DynamicSubAgentPlugin(Star):
 
         self._register_handoff_tool(cfg)
         self._store.agents[agent_id] = cfg
+        # Bug #5 fix: 记录创建 id
+        self._spawned_ids.add(agent_id)
 
         if persistent:
             self._save_store()
 
-        self._spawn_count += 1
+        # Bug #3 fix: 记录协作追踪
+        self._traces.setdefault(event.unified_msg_origin, []).append({
+            "agent_name": name,
+            "agent_id": agent_id,
+            "action": "spawn",
+            "task": task or "(无任务)",
+            "status": "created",
+            "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S"),
+        })
 
         # ── 如果有 task，立即让子 Agent 执行 ──
         if task:
@@ -233,17 +236,17 @@ class DynamicSubAgentPlugin(Star):
                 # 获取所有可用工具
                 full_mgr = self.context.provider_manager.llm_tools
                 if permission_level == "safe":
-                    # safe 只加 web search 类
+                    # safe 只加 web search 类 + spawn_agent（允许嵌套）
                     for t in full_mgr.func_list:
-                        if t.name in ("astrbot_web_search", "brave_web_search", "tavily_web_search", "bocha_web_search"):
+                        if t.name in ("astrbot_web_search", "brave_web_search", "tavily_web_search", "bocha_web_search", "spawn_agent", "list_agents"):
                             sub_tools.add_tool(t)
                 elif permission_level == "medium":
-                    # medium 排除 shell/Python
+                    # medium 排除 shell/Python，但保留 spawn_agent
                     for t in full_mgr.func_list:
                         if t.name not in ("shell_exec", "local_python_exec", "execute_shell", "run_python") and not t.name.startswith("transfer_to_"):
                             sub_tools.add_tool(t)
                 else:
-                    # full 全量
+                    # full 全量（排除 transfer_to_ 防止混乱）
                     for t in full_mgr.func_list:
                         if not t.name.startswith("transfer_to_"):
                             sub_tools.add_tool(t)
@@ -264,6 +267,9 @@ class DynamicSubAgentPlugin(Star):
                 )
                 result_text = llm_resp.completion_text if llm_resp else "(无返回结果)"
                 
+                # Bug #3 fix: 更新追踪状态
+                self._traces[event.unified_msg_origin][-1]["status"] = "completed"
+                
                 return (
                     f"子 Agent [{name}] 创建并执行任务完成！\n"
                     f"任务: {task}\n"
@@ -271,6 +277,7 @@ class DynamicSubAgentPlugin(Star):
                 )
             except Exception as e:
                 logger.error(f"DynamicSubAgent: 子 Agent [{name}] 执行任务失败: {e}")
+                self._traces[event.unified_msg_origin][-1]["status"] = f"failed: {e}"
                 return (
                     f"子 Agent [{name}] 创建成功，但执行任务时出错: {e}\n"
                     f"可通过 transfer_to_{name} 重新尝试。"
@@ -324,10 +331,12 @@ class DynamicSubAgentPlugin(Star):
         if not found:
             return f"未找到名为 [{name}] 的子 Agent"
 
+        # Bug #5 fix: 删除时归还配额
+        self._spawned_ids.discard(found)
         del self._store.agents[found]
         self._unregister_handoff_tool(name)
         self._save_store()
-        return f"子 Agent [{name}] 已销毁并注销 handoff tool"
+        return f"子 Agent [{name}] 已销毁并注销 handoff tool，创建配额已归还"
 
     @filter.llm_tool()
     async def show_collaboration_report(self, event: AstrMessageEvent):
@@ -342,6 +351,7 @@ class DynamicSubAgentPlugin(Star):
         for t in traces:
             lines.append(
                 f"  ├ [{t.get('agent_name','?')}] "
+                f"action: {t.get('action','?')} | "
                 f"task: {t.get('task','?')} | "
                 f"status: {t.get('status','?')} | "
                 f"{t.get('timestamp','?')}"
