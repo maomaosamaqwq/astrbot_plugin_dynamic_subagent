@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from astrbot.api.event import AstrMessageEvent, filter
 from astrbot.api.star import Context, Star, register
 from astrbot.core.provider.register import llm_tools
+from astrbot.core.agent.tool import ToolSet
 from astrbot import logger
 
 # ── Data Models ──────────────────────────
@@ -44,7 +45,7 @@ _MAX_SPAWN = 10
 _MAX_TRACE = 50
 
 
-@register(name="dynamic_subagent", desc="让 AI 动态创建和管理子 Agent", author="maomaosamaqwq", version="0.5.1")
+@register(name="dynamic_subagent", desc="让 AI 动态创建和管理子 Agent", author="maomaosamaqwq", version="0.5.2")
 class DynamicSubAgentPlugin(Star):
     def __init__(self, context: Context, config: dict = None):
         super().__init__(context)
@@ -60,7 +61,7 @@ class DynamicSubAgentPlugin(Star):
     # ── Lifecycle ──
 
     async def initialize(self):
-        logger.info("DynamicSubAgent v0.5.1 已初始化")
+        logger.info("DynamicSubAgent v0.5.2 已初始化")
 
     async def terminate(self):
         logger.info("DynamicSubAgent 已停止")
@@ -152,12 +153,14 @@ class DynamicSubAgentPlugin(Star):
     # ── LLM Tools ──
 
     @filter.llm_tool()
+    @filter.llm_tool()
     async def spawn_agent(
         self,
         event: AstrMessageEvent,
         name: str = "",
         description: str = "",
         instruction: str = "",
+        task: str = "",
         permission_level: str = "safe",
         provider_id: str = "",
         model: str = "",
@@ -166,14 +169,17 @@ class DynamicSubAgentPlugin(Star):
         """
         动态创建一个子 Agent，并注册为 handoff tool。
 
-        注意：创建成功后，transfer_to_{name} 工具会在下一次对话回合中生效。
-        创建后请回复用户提示用户发送下一条消息来使用 handoff 功能，
-        **不要尝试在同一轮对话中立即调用 transfer_to_{name}**。
+        如果同时传入 task 参数，创建后会自动让子 Agent 执行该任务并返回结果。
+        如果不传 task，则仅注册，可在下一轮对话中通过 transfer_to_{name}
+        手动调用。
+
+        建议传 task 一步到位，让子 Agent 创建后立即执行。
 
         Args:
             name(string): 子 Agent 名称（英文/数字/下划线，用作 handoff tool 命名）
             description(string): 子 Agent 的功能描述
             instruction(string): 子 Agent 的系统指令/行为约束
+            task(string): 交给子 Agent 的任务内容。如果提供，创建后立即执行
             permission_level(string): 权限级别 (safe/medium/full)，默认 safe
             provider_id(string): 使用的 provider ID，不传则继承主 Agent
             model(string): 使用的模型名，不传则继承主 Agent
@@ -213,14 +219,70 @@ class DynamicSubAgentPlugin(Star):
 
         self._spawn_count += 1
 
+        # ── 如果有 task，立即让子 Agent 执行 ──
+        if task:
+            try:
+                # 获取 provider
+                prov_id = provider_id or await self.context.get_current_chat_provider_id(
+                    event.unified_msg_origin
+                )
+                
+                # 构建子 Agent 的工具集
+                sub_tools = ToolSet()
+                
+                # 获取所有可用工具
+                full_mgr = self.context.provider_manager.llm_tools
+                if permission_level == "safe":
+                    # safe 只加 web search 类
+                    for t in full_mgr.func_list:
+                        if t.name in ("astrbot_web_search", "brave_web_search", "tavily_web_search", "bocha_web_search"):
+                            sub_tools.add_tool(t)
+                elif permission_level == "medium":
+                    # medium 排除 shell/Python
+                    for t in full_mgr.func_list:
+                        if t.name not in ("shell_exec", "local_python_exec", "execute_shell", "run_python") and not t.name.startswith("transfer_to_"):
+                            sub_tools.add_tool(t)
+                else:
+                    # full 全量
+                    for t in full_mgr.func_list:
+                        if not t.name.startswith("transfer_to_"):
+                            sub_tools.add_tool(t)
+                
+                system_prompt = (
+                    f"你是子 Agent [{name}]。\n"
+                    f"描述: {description}\n"
+                    f"指令: {instruction}\n"
+                    f"请根据任务使用合适的工具完成工作。"
+                )
+                
+                llm_resp = await self.context.tool_loop_agent(
+                    event=event,
+                    chat_provider_id=prov_id,
+                    prompt=task,
+                    system_prompt=system_prompt,
+                    tools=sub_tools,
+                )
+                result_text = llm_resp.completion_text if llm_resp else "(无返回结果)"
+                
+                return (
+                    f"子 Agent [{name}] 创建并执行任务完成！\n"
+                    f"任务: {task}\n"
+                    f"结果:\n{result_text}"
+                )
+            except Exception as e:
+                logger.error(f"DynamicSubAgent: 子 Agent [{name}] 执行任务失败: {e}")
+                return (
+                    f"子 Agent [{name}] 创建成功，但执行任务时出错: {e}\n"
+                    f"可通过 transfer_to_{name} 重新尝试。"
+                )
+
         return (
             f"子 Agent [{name}] 创建成功！\n"
             f"  类型: {'persistent' if persistent else 'transient'}\n"
             f"  权限: {permission_level}\n"
             f"  描述: {description}\n"
             f"  handoff tool: transfer_to_{name}\n"
-            f"创建已完成，请回复用户说子 Agent 已就绪，让用户发送下一条消息来使用 transfer_to_{name}，"
-            f"不要尝试在本轮对话中调用它。"
+            f"创建已完成。请告知用户子 Agent 已就绪，用户在下一轮消息中可使用 transfer_to_{name} 来调用它。"
         )
 
     @filter.llm_tool()
