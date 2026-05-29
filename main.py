@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 
 from astrbot.api.event import AstrMessageEvent, filter
 from astrbot.api.star import Context, Star, register
-from astrbot.core.provider.register import llm_tools, FuncCall
+from astrbot.core.provider.register import llm_tools
 from astrbot import logger
 
 # ── Data Models ──────────────────────────
@@ -44,7 +44,7 @@ _MAX_SPAWN = 10
 _MAX_TRACE = 50
 
 
-@register(name="dynamic_subagent", desc="让 AI 动态创建和管理子 Agent", author="maomaosamaqwq", version="0.4.1")
+@register(name="dynamic_subagent", desc="让 AI 动态创建和管理子 Agent", author="maomaosamaqwq", version="0.5.0")
 class DynamicSubAgentPlugin(Star):
     def __init__(self, context: Context, config: dict = None):
         super().__init__(context)
@@ -60,7 +60,7 @@ class DynamicSubAgentPlugin(Star):
     # ── Lifecycle ──
 
     async def initialize(self):
-        logger.info("DynamicSubAgent v0.4.0 已初始化")
+        logger.info("DynamicSubAgent v0.5.0 已初始化")
 
     async def terminate(self):
         logger.info("DynamicSubAgent 已停止")
@@ -117,10 +117,13 @@ class DynamicSubAgentPlugin(Star):
             f"将任务转交给子 Agent [{cfg.name}] 处理。{cfg.description or '无描述'}",
             self._make_handoff_handler(cfg),
         )
-        # 给工具打上 handler_module_path 标记，确保工具可见
+        # 给工具打上 handler_module_path 标记，确保插件工具可见性判断通过
         tool = tool_mgr.get_func(tool_name)
         if tool:
-            tool.handler_module_path = f"plugins.{self.name}.main"
+            # AstrBot add_llm_tools 会从 __module__ 提取 "plugins.<name>.main" 格式
+            # 我们的闭包 handler.__module__ 是 __name__（即 "main"），解析不对
+            # 直接设为 self.__module__，让 add_llm_tools 的逻辑能正确匹配到插件
+            tool.handler_module_path = __name__
 
     def _unregister_handoff_tool(self, name: str):
         tool_mgr = self.context.provider_manager.llm_tools
@@ -185,6 +188,10 @@ class DynamicSubAgentPlugin(Star):
         if self._find_agent_by_name(name):
             return f"已有同名子 Agent [{name}]，请使用不同的名称"
 
+        # 字符串转布尔（LLM tool 传入的 persistent 可能是 "true"/"false" 字符串）
+        if isinstance(persistent, str):
+            persistent = persistent.lower() in ("true", "1", "yes")
+
         agent_id = uuid.uuid4().hex[:12]
         now = time.time()
         cfg = SubAgentConfig(
@@ -217,15 +224,16 @@ class DynamicSubAgentPlugin(Star):
         if not self._store.agents:
             return "当前没有活跃的子 Agent"
 
+        tool_mgr = self.context.provider_manager.llm_tools
         lines = ["当前活跃的子 Agent:"]
         for aid, cfg in self._store.agents.items():
             registered = any(
-                t.name == f"transfer_to_{cfg.name}" for t in llm_tools.func_list
+                t.name == f"transfer_to_{cfg.name}" for t in tool_mgr.func_list
             )
             status_mark = "[可用]" if registered else "[未注册]"
             lines.append(
                 f"  [{cfg.name}] 权限:{cfg.permission_level} "
-                f"持久:{cfg.id in self._store.agents} {status_mark}"
+                f"{status_mark}"
             )
         lines.append(f"\n总共: {len(self._store.agents)} 个")
         return "\n".join(lines)
