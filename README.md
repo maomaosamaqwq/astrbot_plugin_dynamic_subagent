@@ -1,3 +1,20 @@
+> **Dynamic SubAgent** 🐾
+> **Version:** 0.6.4
+> **Author:** maomaosamaqwq
+> **Type:** AstrBot Plugin
+> **Desc:** 具备权限隔离与嵌套深度限制的子 Agent 系统
+>
+> **特性:**
+> 🧠 动态创建 spawn/transfer
+> 🔒 三级权限 safe/medium/full
+> 🛡 子 Agent 不可再 spawn
+> 💾 persistent 持久化记忆
+>
+> **安装:**
+> `AstrBot 插件市场 → dynamic_subagent`
+
+---
+
 # 🐾 Dynamic SubAgent
 
 [![Version](https://img.shields.io/github/v/release/maomaosamaqwq/astrbot_plugin_dynamic_subagent)](https://github.com/maomaosamaqwq/astrbot_plugin_dynamic_subagent/releases)
