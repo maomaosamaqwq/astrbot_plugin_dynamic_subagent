@@ -1,24 +1,38 @@
 from __future__ import annotations
 
 import json
-import logging
+import time
 import uuid
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timezone
 from typing import Any
 
-from astrbot.api.star import Context, Star, register
 from astrbot.api.event import AstrMessageEvent, filter
-from astrbot.api.provider import LLMResponse, ProviderRequest
+from astrbot.api.star import Context, Star, PluginKVStoreMixin, register
 from astrbot.core.agent.agent import Agent
 from astrbot.core.agent.handoff import HandoffTool
+from astrbot.core.agent.tool import ToolSet
 from astrbot.core.astr_agent_context import AstrAgentContext
+from astrbot.core.message.message_event_result import MessageChain
 from astrbot.core.provider.register import llm_tools
 from astrbot.core import logger
 
-# ──────────────────────────────────────────────
+# ══════════════════════════════════════════════
+# Constants
+# ══════════════════════════════════════════════
+
+_HANDOFF_COUNT_KEY = "_dynamic_subagent_handoff_count"
+_AGENT_SPAWN_COUNT_KEY = "_dynamic_subagent_spawn_count"
+_MAX_HANDOFFS_PER_EVENT = 20
+_MAX_SPAWNS_PER_EVENT = 10
+
+_DEFAULT_MAX_DEPTH = 3
+_DEFAULT_MAX_PER_EVENT = 5
+_DEFAULT_AGENT_TIMEOUT = 120.0
+
+# ══════════════════════════════════════════════
 # Data models
-# ──────────────────────────────────────────────
+# ══════════════════════════════════════════════
 
 
 @dataclass
@@ -31,9 +45,12 @@ class SubAgentConfig:
     permission_level: str = "safe"  # safe | medium | full
     lifecycle: str = "transient"  # transient | persistent
     tools: list[str] | None = None  # None = 继承主 Agent 工具
+    max_depth: int = _DEFAULT_MAX_DEPTH
+    max_per_event: int = _DEFAULT_MAX_PER_EVENT
+    timeout: float = _DEFAULT_AGENT_TIMEOUT
     created_at: str = ""
     agent_id: str = ""
-    tool_name: str = ""  # 注册到 llm_tools 后的 tool 名称，如 transfer_to_xxx
+    tool_name: str = ""
 
     def __post_init__(self):
         if not self.agent_id:
@@ -42,6 +59,30 @@ class SubAgentConfig:
             self.created_at = datetime.now(timezone.utc).isoformat()
         if not self.tool_name:
             self.tool_name = f"transfer_to_{self.name}"
+
+    def validate(self) -> str | None:
+        """返回 None 表示有效，返回字符串表示错误信息"""
+        import re
+
+        if not self.name or not self.name.strip():
+            return "name 不能为空"
+        if not re.match(r"^[\w\u4e00-\u9fff\-]+$", self.name):
+            return "name 只能包含字母、数字、中文、下划线和连字符"
+        if self.permission_level not in ("safe", "medium", "full"):
+            return "permission_level 必须是 safe / medium / full"
+        if self.lifecycle not in ("transient", "persistent"):
+            return "lifecycle 必须是 transient / persistent"
+        if self.max_depth < 1 or self.max_depth > 10:
+            return "max_depth 必须在 1-10 之间"
+        if self.max_per_event < 1 or self.max_per_event > 50:
+            return "max_per_event 必须在 1-50 之间"
+        if self.timeout < 5 or self.timeout > 600:
+            return "timeout 必须在 5-600 秒之间"
+        if self.provider_id and len(self.provider_id) > 100:
+            return "provider_id 过长"
+        if self.system_prompt and len(self.system_prompt) > 4000:
+            return "system_prompt 过长（限 4000 字符）"
+        return None
 
 
 @dataclass
@@ -52,36 +93,39 @@ class SubAgentStore:
 
 
 # ──────────────────────────────────────────────
-# Helper: map permission_level -> tool access
+# Permission level -> tool access mapping
 # ──────────────────────────────────────────────
 
-_PERMISSION_TOOLS: dict[str, list[str] | None] = {
-    "safe": ["web_search", "send_message_to_user"],
-    "medium": None,  # None = 全部工具
-    "full": None,
-}
+_SAFE_FUNCTION_TOOLS = ["web_search", "send_message_to_user", "fetch_url"]
 
 
-def _check_permission_tools(level: str, tools: list[str] | None) -> list[str] | None:
-    """根据权限级别确定子 Agent 可用的工具"""
-    if tools is not None:
-        return tools
-    return _PERMISSION_TOOLS.get(level, None)
+def _build_tool_set(tools: list[str] | None) -> ToolSet | None:
+    """根据工具白名单构建 ToolSet"""
+    if tools is None:
+        return None
+    if not tools:
+        return None
+    ts = ToolSet()
+    for name in tools:
+        ft = llm_tools.get_func(name)
+        if ft and ft.active:
+            ts.add_tool(ft)
+    return None if ts.empty() else ts
 
 
-# ──────────────────────────────────────────────
+# ══════════════════════════════════════════════
 # Main Plugin
-# ──────────────────────────────────────────────
+# ══════════════════════════════════════════════
 
 
 @register(
-    name="DynamicSubAgent",
-    author="maomaosamaqwq",
-    desc="让 AI 可以通过 tool call 动态创建和管理子 Agent",
-    version="0.2.0",
-    repo="https://github.com/maomaosamaqwq/astrbot_plugin_dynamic_subagent",
+    "DynamicSubAgent",
+    "maomaosamaqwq",
+    "让 AI 可以通过 tool call 动态创建和管理子 Agent",
+    "0.3.0",
+    "https://github.com/maomaosamaqwq/astrbot_plugin_dynamic_subagent",
 )
-class DynamicSubAgentPlugin(Star):
+class DynamicSubAgentPlugin(Star, PluginKVStoreMixin):
     """Dynamic SubAgent 插件 — 让 AI 动态创建和管理子 Agent"""
 
     def __init__(self, context: Context, config: dict | None = None):
@@ -91,23 +135,38 @@ class DynamicSubAgentPlugin(Star):
         self._model_filter_mode = self._config.get("model_filter_mode", "blacklist")
         self._allowed_models = set(self._config.get("allowed_models", []))
 
-        # 运行时状态: transient agent 存在这里
+        # 运行时状态
         self._runtime_agents: dict[str, SubAgentConfig] = {}
-
-        # 持久化存储层 (通过 PluginKVStoreMixin)
         self._persist_key = "dynamic_subagent_store"
-        self._store = self._load_store()
+        self._store: SubAgentStore = SubAgentStore()
 
-        # 启动时恢复持久化的 agent 注册
+        # 每次事件最后的 handoff 追踪
+        self._last_traces: dict[str, list[dict]] = {}
+
+    # ── Lifecycle ──────────────────────────────
+
+    async def initialize(self):
+        """插件初始化：加载持久化 + 恢复注册 + 清理 + 注册 API"""
+        self._store = self._load_store()
         self._restore_persistent_agents()
         self._cleanup_stale_tools()
-
-        # 注册 WebUI API 路由
         self._register_web_apis()
+        logger.info(
+            "DynamicSubAgent initialized: %d persistent + %d runtime agents",
+            len(self._store.agents),
+            len(self._runtime_agents),
+        )
 
-    # ──────────────────────────────────────────
-    # Persistence helpers
-    # ──────────────────────────────────────────
+    async def terminate(self):
+        """插件卸载时清理所有动态注册的 HandoffTool"""
+        for cfg in list(self._runtime_agents.values()):
+            self._remove_handoff_tool(cfg.tool_name)
+        for cfg in list(self._store.agents.values()):
+            self._remove_handoff_tool(cfg.tool_name)
+        self._runtime_agents.clear()
+        logger.info("DynamicSubAgent: terminated, all handoff tools removed")
+
+    # ── Persistence ────────────────────────────
 
     def _load_store(self) -> SubAgentStore:
         try:
@@ -119,34 +178,28 @@ class DynamicSubAgentPlugin(Star):
                     agents[aid] = SubAgentConfig(**cfg)
                 return SubAgentStore(agents=agents)
         except Exception as e:
-            logger.warning(f"Failed to load subagent store: {e}")
+            logger.warning("DynamicSubAgent: failed to load store: %s", e)
         return SubAgentStore()
 
     def _save_store(self):
         try:
             data = {
-                "agents": {
-                    aid: asdict(cfg) for aid, cfg in self._store.agents.items()
-                }
+                "agents": {aid: asdict(cfg) for aid, cfg in self._store.agents.items()}
             }
             self.put(self._persist_key, json.dumps(data, ensure_ascii=False))
         except Exception as e:
-            logger.error(f"Failed to save subagent store: {e}")
+            logger.error("DynamicSubAgent: failed to save store: %s", e)
 
-    # ──────────────────────────────────────────
-    # HandoffTool registration
-    # ──────────────────────────────────────────
+    # ── HandoffTool management ─────────────────
 
     def _register_handoff_tool(self, cfg: SubAgentConfig):
         """为子 Agent 创建并注册 HandoffTool"""
-        tools = _check_permission_tools(cfg.permission_level, cfg.tools)
+        tools = _build_tool_set(cfg.tools)
         agent = Agent[AstrAgentContext](
             name=cfg.name,
             instructions=cfg.system_prompt,
             tools=tools,
         )
-
-        # 如果指定了 provider_id，传给 HandoffTool
         handoff = HandoffTool(
             agent=agent,
             tool_description=f"将任务转交给 {cfg.name}（{cfg.permission_level} 权限）处理",
@@ -154,58 +207,110 @@ class DynamicSubAgentPlugin(Star):
         if cfg.provider_id:
             handoff.provider_id = cfg.provider_id
 
-        # 移除旧的同名 tool（如果有）
         self._remove_handoff_tool(cfg.tool_name)
-
-        # 注册到全局 llm_tools
         llm_tools.func_list.append(handoff)
-        logger.info(f"Registered handoff tool: {cfg.tool_name} ({cfg.name})")
+        logger.info(
+            "DynamicSubAgent: registered %s (%s) depth=%d timeout=%.0fs",
+            cfg.tool_name,
+            cfg.name,
+            cfg.max_depth,
+            cfg.timeout,
+        )
 
     def _remove_handoff_tool(self, tool_name: str):
-        """从 llm_tools 中移除 HandoffTool"""
         for i, f in enumerate(llm_tools.func_list):
             if isinstance(f, HandoffTool) and f.name == tool_name:
                 llm_tools.func_list.pop(i)
-                logger.info(f"Removed handoff tool: {tool_name}")
                 return
 
     def _restore_persistent_agents(self):
-        """启动时恢复持久化 agent 的 HandoffTool 注册"""
         for cfg in self._store.agents.values():
             try:
                 self._register_handoff_tool(cfg)
             except Exception as e:
-                logger.error(f"Failed to restore agent {cfg.name}: {e}")
+                logger.error("Failed to restore agent %s: %s", cfg.name, e)
 
     def _cleanup_stale_tools(self):
-        """清理死掉的 HandoffTool（持久化中已删除但还在列表里的）"""
-        valid_tool_names = {cfg.tool_name for cfg in self._store.agents.values()}
-        valid_tool_names.update(
-            cfg.tool_name for cfg in self._runtime_agents.values()
-        )
+        valid = {cfg.tool_name for cfg in self._store.agents.values()}
+        valid.update(cfg.tool_name for cfg in self._runtime_agents.values())
         i = 0
         while i < len(llm_tools.func_list):
             f = llm_tools.func_list[i]
-            if isinstance(f, HandoffTool) and f.name not in valid_tool_names:
+            if isinstance(f, HandoffTool) and f.name not in valid:
                 llm_tools.func_list.pop(i)
-                logger.info(f"Cleaned up stale handoff tool: {f.name}")
             else:
                 i += 1
 
-    # ──────────────────────────────────────────
-    # Model filter
-    # ──────────────────────────────────────────
+    # ── Model filter ───────────────────────────
 
     def _is_model_allowed(self, model_id: str) -> bool:
+        if not model_id:
+            return True
         if self._model_filter_mode == "blacklist":
             return model_id not in self._model_blacklist
         elif self._model_filter_mode == "whitelist":
             return model_id in self._allowed_models
         return True
 
-    # ──────────────────────────────────────────
-    # WebUI API routes
-    # ──────────────────────────────────────────
+    # ── Security: handoff circuit breaker ──────
+
+    @filter.on_llm_request()
+    async def _on_llm_request(self, event: AstrMessageEvent, request) -> None:
+        """在 LLM 请求前，如果 handoff 熔断触发则移除所有 HandoffTools"""
+        if not hasattr(request, "func_tool") or not request.func_tool:
+            return
+
+        count = event.get_extra(_HANDOFF_COUNT_KEY, 0)
+        if count >= _MAX_HANDOFFS_PER_EVENT:
+            tools = getattr(request.func_tool, "tools", None)
+            if isinstance(tools, list):
+                request.func_tool.tools = [
+                    t for t in tools if not isinstance(t, HandoffTool)
+                ]
+                logger.warning(
+                    "DynamicSubAgent: handoff circuit breaker triggered "
+                    "(%d/%d), HandoffTools removed",
+                    count,
+                    _MAX_HANDOFFS_PER_EVENT,
+                )
+
+    def _count_handoff(self, event: AstrMessageEvent) -> int:
+        """递增 handoff 计数，返回新计数"""
+        count = event.get_extra(_HANDOFF_COUNT_KEY, 0) + 1
+        event.set_extra(_HANDOFF_COUNT_KEY, count)
+        return count
+
+    def _count_spawn(self, event: AstrMessageEvent) -> int:
+        """递增 spawn 计数，返回新计数"""
+        count = event.get_extra(_AGENT_SPAWN_COUNT_KEY, 0) + 1
+        event.set_extra(_AGENT_SPAWN_COUNT_KEY, count)
+        return count
+
+    # ── Trace recording ────────────────────────
+
+    def _record_handoff_trace(
+        self,
+        event: AstrMessageEvent,
+        agent_name: str,
+        task: str,
+        response: str,
+        status: str = "success",
+    ):
+        """记录一次 handoff 调用到追踪列表"""
+        umo = event.unified_msg_origin
+        traces = self._last_traces.get(umo, [])
+        traces.append(
+            {
+                "agent_name": agent_name,
+                "task": task[:500],
+                "response": response[:500],
+                "status": status,
+                "timestamp": time.time(),
+            }
+        )
+        self._last_traces[umo] = traces
+
+    # ── WebUI API routes ───────────────────────
 
     def _serialize(self, cfg: SubAgentConfig, registered: bool = True) -> dict:
         return {
@@ -217,6 +322,9 @@ class DynamicSubAgentPlugin(Star):
             "lifecycle": cfg.lifecycle,
             "tools": cfg.tools,
             "tool_name": cfg.tool_name,
+            "max_depth": cfg.max_depth,
+            "max_per_event": cfg.max_per_event,
+            "timeout": cfg.timeout,
             "registered": registered,
             "created_at": cfg.created_at,
         }
@@ -226,9 +334,11 @@ class DynamicSubAgentPlugin(Star):
         try:
             ctx = getattr(self, "context", None)
             if ctx is None or not hasattr(ctx, "register_web_api"):
+                logger.warning("DynamicSubAgent: context.register_web_api not available")
                 return
 
-            # GET /plugin/subagent/list
+            from quart import request as q_request
+
             async def list_api():
                 agents = []
                 for cfg in self._runtime_agents.values():
@@ -241,32 +351,32 @@ class DynamicSubAgentPlugin(Star):
                     agents.append(self._serialize(cfg, registered))
                 return {"status": "ok", "data": agents}
 
-            # POST /plugin/subagent/create
-            async def create_api(
-                name: str = "",
-                system_prompt: str = "",
-                provider_id: str = "",
-                permission_level: str = "safe",
-                lifecycle: str = "transient",
-                tools: list[str] | None = None,
-            ):
+            async def create_api():
+                body = await q_request.get_json(silent=True) or {}
+                name = body.get("name", "")
                 if not name:
                     return {"status": "error", "message": "名称不能为空"}
-                if provider_id and not self._is_model_allowed(provider_id):
-                    return {
-                        "status": "error",
-                        "message": f"模型 {provider_id} 被禁止",
-                    }
                 cfg = SubAgentConfig(
                     name=name,
-                    system_prompt=system_prompt,
-                    provider_id=provider_id or None,
-                    permission_level=permission_level,
-                    lifecycle=lifecycle,
-                    tools=tools,
+                    system_prompt=body.get("system_prompt", ""),
+                    provider_id=body.get("provider_id") or None,
+                    permission_level=body.get("permission_level", "safe"),
+                    lifecycle=body.get("lifecycle", "transient"),
+                    tools=body.get("tools"),
+                    max_depth=int(body.get("max_depth", _DEFAULT_MAX_DEPTH)),
+                    max_per_event=int(body.get("max_per_event", _DEFAULT_MAX_PER_EVENT)),
+                    timeout=float(body.get("timeout", _DEFAULT_AGENT_TIMEOUT)),
                 )
+                err = cfg.validate()
+                if err:
+                    return {"status": "error", "message": err}
+                if cfg.provider_id and not self._is_model_allowed(cfg.provider_id):
+                    return {
+                        "status": "error",
+                        "message": f"模型 {cfg.provider_id} 被禁止",
+                    }
                 self._register_handoff_tool(cfg)
-                if lifecycle == "persistent":
+                if cfg.lifecycle == "persistent":
                     self._store.agents[cfg.agent_id] = cfg
                     self._save_store()
                 else:
@@ -277,8 +387,9 @@ class DynamicSubAgentPlugin(Star):
                     "message": f"子 Agent {name} 创建成功",
                 }
 
-            # POST /plugin/subagent/delete
-            async def delete_api(agent_id: str = ""):
+            async def delete_api():
+                body = await q_request.get_json(silent=True) or {}
+                agent_id = body.get("agent_id", "")
                 if not agent_id:
                     return {"status": "error", "message": "agent_id 不能为空"}
                 if agent_id in self._runtime_agents:
@@ -297,28 +408,31 @@ class DynamicSubAgentPlugin(Star):
                     }
                 return {"status": "error", "message": "未找到该子 Agent"}
 
+            async def trace_api():
+                umo = q_request.args.get("umo", "")
+                trace = self._last_traces.get(umo, [])
+                return {"status": "ok", "data": trace}
+
             ctx.register_web_api(
                 "/plugin/subagent/list", list_api, ["GET"], "获取子 Agent 列表"
             )
             ctx.register_web_api(
-                "/plugin/subagent/create",
-                create_api,
-                ["POST"],
-                "创建子 Agent",
+                "/plugin/subagent/create", create_api, ["POST"], "创建子 Agent"
             )
             ctx.register_web_api(
-                "/plugin/subagent/delete",
-                delete_api,
-                ["POST"],
-                "删除子 Agent",
+                "/plugin/subagent/delete", delete_api, ["POST"], "删除子 Agent"
             )
-            logger.info("DynamicSubAgent: registered 3 WebUI API routes")
+            ctx.register_web_api(
+                "/plugin/subagent/trace",
+                trace_api,
+                ["GET"],
+                "获取协作追踪记录",
+            )
+            logger.info("DynamicSubAgent: registered 4 WebUI API routes")
         except Exception as e:
-            logger.error(f"DynamicSubAgent: failed to register WebUI routes: {e}")
+            logger.error("DynamicSubAgent: failed to register WebUI routes: %s", e)
 
-    # ──────────────────────────────────────────
-    # AI Tools
-    # ──────────────────────────────────────────
+    # ── LLM Tools ──────────────────────────────
 
     @filter.llm_tool(
         name="spawn_agent",
@@ -333,6 +447,9 @@ class DynamicSubAgentPlugin(Star):
         permission_level: str = "safe",
         lifecycle: str = "transient",
         tools: list[str] | None = None,
+        max_depth: int = _DEFAULT_MAX_DEPTH,
+        max_per_event: int = _DEFAULT_MAX_PER_EVENT,
+        timeout: float = _DEFAULT_AGENT_TIMEOUT,
     ):
         """
         创建一个子 Agent。
@@ -344,10 +461,17 @@ class DynamicSubAgentPlugin(Star):
             permission_level(string): 权限级别 (safe|medium|full)
             lifecycle(string): 生命周期 (transient|persistent)
             tools(array[string]|null): 可用的工具列表，None 表示继承主 Agent 的工具
+            max_depth(int): 该子 Agent 最大 handoff 嵌套深度 (1-10)
+            max_per_event(int): 单次对话中该子 Agent 最大创建次数 (1-50)
+            timeout(float): 子 Agent 超时时间，秒 (5-600)
         """
-        # 验证模型
-        if provider_id and not self._is_model_allowed(provider_id):
-            return f"模型 `{provider_id}` 当前在{'黑名单' if self._model_filter_mode == 'blacklist' else '白名单过滤'}中，不允许使用。请选择其他模型。"
+        # 全局 spawn 熔断
+        spawn_count = self._count_spawn(event)
+        if spawn_count > _MAX_SPAWNS_PER_EVENT:
+            return (
+                f"[AGENT_ERROR] 本对话中已创建 {spawn_count - 1} 个子 Agent "
+                f"(上限: {_MAX_SPAWNS_PER_EVENT})，请使用已有 Agent 或删除不再需要的。"
+            )
 
         cfg = SubAgentConfig(
             name=name,
@@ -356,12 +480,20 @@ class DynamicSubAgentPlugin(Star):
             permission_level=permission_level,
             lifecycle=lifecycle,
             tools=tools,
+            max_depth=max_depth,
+            max_per_event=max_per_event,
+            timeout=timeout,
         )
 
-        # 注册 HandoffTool
+        err = cfg.validate()
+        if err:
+            return f"[AGENT_ERROR] 参数验证失败: {err}"
+
+        if cfg.provider_id and not self._is_model_allowed(cfg.provider_id):
+            return f"模型 `{cfg.provider_id}` 被禁止"
+
         self._register_handoff_tool(cfg)
 
-        # 存储
         if lifecycle == "persistent":
             self._store.agents[cfg.agent_id] = cfg
             self._save_store()
@@ -373,7 +505,9 @@ class DynamicSubAgentPlugin(Star):
             f"agent_id: {cfg.agent_id}\n"
             f"生命周期: {lifecycle}\n"
             f"权限级别: {permission_level}\n"
-            f"模型: {provider_id or '继承主 Agent'}\n\n"
+            f"模型: {provider_id or '继承主 Agent'}\n"
+            f"最大嵌套深度: {max_depth}\n"
+            f"超时: {timeout}s\n\n"
             f"现在你可以直接调用 `{cfg.tool_name}` 工具将任务转交给该子 Agent 处理。"
         )
 
@@ -392,7 +526,6 @@ class DynamicSubAgentPlugin(Star):
 
         lines = ["## 活跃子 Agent 列表\n"]
         for a in agents:
-            # 检查 tool 是否真正注册了
             tool_registered = any(
                 isinstance(f, HandoffTool) and f.name == a.tool_name
                 for f in llm_tools.func_list
@@ -402,6 +535,7 @@ class DynamicSubAgentPlugin(Star):
                 f"- **{a.name}** (`{a.agent_id}`) {status}\n"
                 f"  - 生命周期: {a.lifecycle} | 权限: {a.permission_level}\n"
                 f"  - 模型: {a.provider_id or '继承主 Agent'}\n"
+                f"  - 嵌套深度: {a.max_depth} | 超时: {a.timeout}s\n"
                 f"  - Tool: `{a.tool_name}`\n"
                 f"  - 创建于: {a.created_at}\n"
             )
@@ -422,14 +556,12 @@ class DynamicSubAgentPlugin(Star):
         Args:
             agent_id(string): 要销毁的子 Agent ID
         """
-        # 从 transient 中找
         if agent_id in self._runtime_agents:
             cfg = self._runtime_agents[agent_id]
             self._remove_handoff_tool(cfg.tool_name)
             del self._runtime_agents[agent_id]
             return f"子 Agent `{cfg.name}` (`{agent_id}`) 已销毁，对应的 tool `{cfg.tool_name}` 已移除。"
 
-        # 从 persistent 中找
         if agent_id in self._store.agents:
             cfg = self._store.agents[agent_id]
             self._remove_handoff_tool(cfg.tool_name)
@@ -439,15 +571,91 @@ class DynamicSubAgentPlugin(Star):
 
         return f"未找到 agent_id `{agent_id}` 对应的子 Agent。"
 
-    # ──────────────────────────────────────────
-    # Lifecycle hooks
-    # ──────────────────────────────────────────
+    @filter.llm_tool(
+        name="show_collaboration_report",
+        description="以图片展示当前对话的子 Agent 协作追踪报告。仅在所有 handoff 完成后调用一次。",
+    )
+    async def show_collaboration_report(self, event: AstrMessageEvent):
+        """展示子 Agent 协作追踪报告"""
+        umo = event.unified_msg_origin
+        trace = self._last_traces.get(umo, [])
+        if not trace:
+            return "本次对话中尚无子 Agent 协作记录。"
 
-    async def terminate(self):
-        """插件卸载时清理所有动态注册的 HandoffTool"""
-        for cfg in list(self._runtime_agents.values()):
-            self._remove_handoff_tool(cfg.tool_name)
-        for cfg in list(self._store.agents.values()):
-            self._remove_handoff_tool(cfg.tool_name)
-        self._runtime_agents.clear()
-        logger.info("DynamicSubAgent: cleaned up all handoff tools and transient agents")
+        try:
+            rendered = await self._render_trace_image(trace)
+            await event.send(MessageChain().url_image(rendered))
+        except Exception:
+            text = self._format_trace_text(trace)
+            await event.send(MessageChain().message(text))
+        return "协作报告已发送给用户。"
+
+    # ── Trace rendering ────────────────────────
+
+    async def _render_trace_image(self, trace: list[dict]) -> str:
+        """HTML 模板渲染追踪报告为图片"""
+        import html as _html
+
+        prepared = []
+        for entry in trace:
+            prepared.append(
+                {
+                    **entry,
+                    "time_str": datetime.fromtimestamp(entry["timestamp"]).strftime(
+                        "%H:%M:%S"
+                    ),
+                    "agent_name": _html.escape(str(entry.get("agent_name", ""))),
+                    "task_short": (
+                        _html.escape(entry["task"][:200]) + "..."
+                        if len(entry["task"]) > 200
+                        else _html.escape(entry["task"])
+                    ),
+                    "response_short": (
+                        _html.escape(entry["response"][:300]) + "..."
+                        if len(entry["response"]) > 300
+                        else _html.escape(entry["response"])
+                    ),
+                }
+            )
+
+        template = """\
+<div style="font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; \
+max-width: 640px; padding: 24px; background: #fff;">
+  <h2 style="border-bottom: 2px solid #4A90D9; padding-bottom: 8px; \
+margin-top: 0; color: #333;">
+    Sub-Agent Collaboration Report
+  </h2>
+  {% for entry in trace %}
+  <div style="margin: 14px 0; padding: 12px; border-radius: 6px; \
+border-left: 4px solid {{ '#4A90D9' if entry.status == 'success' else '#E74C3C' }}; \
+background: {{ '#F7FAFC' if entry.status == 'success' else '#FDF2F2' }};">
+    <div style="font-size: 12px; color: #999; margin-bottom: 4px;">
+      Step {{ loop.index }} &middot; {{ entry.agent_name }} &middot; {{ entry.time_str }}
+    </div>
+    <div style="font-size: 13px; color: #555; margin: 6px 0; line-height: 1.5;">
+      <em>Task:</em> {{ entry.task_short }}
+    </div>
+    <div style="font-size: 13px; color: #333; margin: 6px 0; line-height: 1.5;">
+      <em>Response:</em> {{ entry.response_short }}
+    </div>
+  </div>
+  {% endfor %}
+</div>"""
+
+        return await self.html_render(template, {"trace": prepared}, return_url=True)
+
+    @staticmethod
+    def _format_trace_text(trace: list[dict]) -> str:
+        """追踪报告纯文本 fallback"""
+        lines = ["===== Sub-Agent Collaboration Report =====\n"]
+        for i, entry in enumerate(trace, 1):
+            ts = datetime.fromtimestamp(entry["timestamp"]).strftime("%H:%M:%S")
+            status = "OK" if entry.get("status", "success") == "success" else "ERROR"
+            lines.append(
+                f"[Step {i}] {ts} | {status}\n"
+                f"  Agent: {entry.get('agent_name', '?')}\n"
+                f"  Task: {entry['task'][:200]}\n"
+                f"  Response: {entry['response'][:300]}\n"
+            )
+        lines.append(f"\nTotal steps: {len(trace)}")
+        return "\n".join(lines)

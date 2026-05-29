@@ -1,98 +1,111 @@
-# Dynamic SubAgent for AstrBot
+# Dynamic SubAgent Plugin / 动态子代理插件
 
-让 AstrBot 的 AI **通过 Tool Call 动态创建子 Agent**，并将其注册为可调用的 `HandoffTool`。
+让 AI 可以通过 **tool call 动态创建子 Agent**，每个子 Agent 自动注册为 HandoffTool，主 AI 可直接 handoff 任务给它。
+支持 transient（用完即焚）和 persistent（跨对话持久化）双生命周期。
 
-## 核心能力
+## 功能
 
-- 🧬 **动态生成** — AI 调用 `spawn_agent` 实时创建子 Agent，自动注册为 HandoffTool
-- 🔄 **一键 Handoff** — 创建后主 AI 直接调用 `transfer_to_<name>` 转交任务，子 Agent 独立执行
-- 🔥 **用完即焚 / 持久化** — transient（对话级）和 persistent（跨对话）双生命周期
-- 🛡️ **权限分级** — safe / medium / full 三级工具访问权限
-- 🤖 **多模型支持** — 子 Agent 可指定不同的 provider
-- 🚫 **模型黑名单/白名单** — 防止 AI 选择昂贵或不稳定的模型
+- **动态创建** — AI 调用 `spawn_agent` 创建子 Agent，即刻可用
+- **Handoff 转交** — 每个子 Agent 生成 `transfer_to_<name>` 工具，主 AI 可直接 handoff
+- **双生命周期** — transient（内存级，用完即焚）/ persistent（KVStore 持久化，重启恢复）
+- **权限分级** — safe（只读）/ medium（含 Python/Shell）/ full（全部工具）
+- **模型过滤** — 黑名单/白名单，防止 AI 选到昂贵或不稳定的模型
+- **WebUI 管理** — 可视化查看/创建/销毁子 Agent
+- **安全熔断** — handoff 次数上限、spawn 次数上限、参数校验、嵌套深度限制
+- **协作追踪** — 记录子 Agent 调用链路，可生成图片报告
 
-## 工作流程
-
-```
-用户: "帮我写一个数据分析脚本"
-
-AI 调用 spawn_agent("代码专家", prompt="你精通Python数据分析...")
-  → 插件创建 Agent + 注册 HandoffTool
-
-AI 看到多了个 transfer_to_代码专家 tool
-  → 调用 transfer_to_代码专家("分析这个数据...")
-  → Handoff：控制权转交给子 Agent
-
-代码专家（子 Agent）:
-  → 自己的 system_prompt + 工具
-  → 独立执行任务
-  → 返回结果
-
-AI 收到结果，总结回复用户
-```
+> 💡 这是 **Handoff 流派** 的实现。另有一个 **委派流派** 的姊妹插件 [astrbot_plugin_subagent_worktogether](https://github.com/ScarletAugus/astrbot_plugin_subagent_worktogether) 支持链式委派和追踪报告。
 
 ## 安装
 
-将插件目录放入 AstrBot 的 `addons` 目录，或在管理面板中搜索安装。
+```bash
+# 通过 AstrBot 插件市场安装 (待上线)
+# 或手动克隆
+git clone https://github.com/maomaosamaqwq/astrbot_plugin_dynamic_subagent.git
+```
+
+然后在 AstrBot WebUI → 插件管理 → 加载插件。
+
+## 前置条件
+
+- AstrBot **v3.5.19+**（自动发现继承 `Star` 的类）
+
+## AI 可用工具
+
+| 工具 | 描述 |
+|------|------|
+| `spawn_agent` | 创建一个子 Agent，自动注册 HandoffTool |
+| `list_agents` | 查看所有活跃的子 Agent |
+| `delete_agent` | 按 agent_id 销毁子 Agent |
+| `show_collaboration_report` | 生成子 Agent 协作追踪图片报告 |
+
+### spawn_agent 参数
+
+| 参数 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `name` | string | - | **必填**。子 Agent 名称，会生成 `transfer_to_<name>` 工具 |
+| `system_prompt` | string | "" | 系统提示词，定义角色和行为 |
+| `provider_id` | string | "" | 使用的模型/Provider ID，留空继承主 Agent |
+| `permission_level` | string | "safe" | `safe` / `medium` / `full` |
+| `lifecycle` | string | "transient" | `transient` / `persistent` |
+| `tools` | array | null | 工具列表，null 继承主 Agent |
+| `max_depth` | int | 3 | 最大 handoff 嵌套深度 (1-10) |
+| `max_per_event` | int | 5 | 单次对话最大创建次数 (1-50) |
+| `timeout` | float | 120 | 子 Agent 超时秒数 (5-600) |
+
+### 使用示例
+
+1. 用户说："创建一个翻译助手"
+2. AI 调用 `spawn_agent(name="翻译助手", system_prompt="你是一个专业中英翻译")`
+3. 插件返回：`transfer_to_翻译助手` 工具已注册
+4. AI 调用 `transfer_to_翻译助手` 转交翻译任务
+5. 翻译助手处理完成后，控制权回到主 AI
+6. AI 调用 `show_collaboration_report` 生成协作报告
+
+## 安全机制
+
+| 防护层 | 说明 |
+|--------|------|
+| Handoff 熔断 | 单次对话 handoff 超过 **20 次** 自动移除所有 HandoffTool |
+| Spawn 上限 | 单次对话最多创建 **10 个** 子 Agent |
+| 参数校验 | name/权限/深度/超时等参数严格校验 |
+| 模型过滤 | 黑名单/白名单双重模式 |
+| 嵌套深度 | 子 Agent 可配置最大嵌套深度 |
+
+## WebUI
+
+插件注册了 `/plugin/subagent/dashboard` 页面，可在 AstrBot 管理面板查看：
+- 所有子 Agent 列表（在线/离线状态）
+- 手动创建/销毁子 Agent
+- 协作追踪记录
 
 ## 配置
 
-编辑 `astrbot_plugin_dynamic_subagent.yaml`：
+在 `metadata.yaml` 中配置：
 
 ```yaml
 model_blacklist:
-  - "openai/gpt-4o"
-  - "anthropic/claude-sonnet-4"
-
-model_filter_mode: blacklist  # blacklist | whitelist
-
-allowed_models:
-  - "deepseek/deepseek-chat"
-  - "openai/gpt-4o-mini"
+  - "gpt-5-turbo"
+  - "claude-4-opus"
+model_filter_mode: "blacklist"  # blacklist | whitelist
+allowed_models: []              # whitelist 模式下有效
+max_handoffs_per_event: 20      # handoff 熔断阈值
+max_spawns_per_event: 10        # spawn 上限
+default_max_depth: 3            # 默认嵌套深度
+default_timeout: 120.0          # 默认超时(秒)
+trace_enabled: true             # 协作追踪开关
 ```
 
-## Tool 列表
+## 版本历史
 
-| Tool | 说明 |
-|------|------|
-| `spawn_agent` | 创建子 Agent + 注册为 HandoffTool |
-| `list_agents` | 查看所有活跃子 Agent 及其状态 |
-| `delete_agent` | 销毁子 Agent，移除对应的 tool |
-| `transfer_to_<name>` | （自动生成）向指定子 Agent handoff 任务 |
+- **v0.3.0** — 安全熔断（handoff/spawn 上限）、参数校验、协作追踪报告
+- **v0.2.0** — HandoffTool 集成 + WebUI 管理页面
+- **v0.1.0** — 4 个 Tool + 双生命周期
 
-## 示例对话
+## 与其他插件的关系
 
-```
-🧑 帮我查一下最新的 AI 新闻，然后翻译成中文
+- [astrbot_plugin_subagent_worktogether](https://github.com/ScarletAugus/astrbot_plugin_subagent_worktogether) — 同一作者的不同思路，**委派流派**，支持链式委派、追踪报告和安全熔断。两个插件可以并存互补。
 
-🤖 我来创建一个搜索专家子 Agent 来处理。
-    (spawn_agent → 创建 "搜索助手")
-    搜索助手已就绪，我来 handoff 给它。
-    (transfer_to_搜索助手 → 子 Agent 搜索 + 整理)
-    根据搜索专家返回的结果：
-    1. GPT-5 发布...
-    2. ...
-```
-
-## 插件开发
-
-```python
-# 创建子 Agent
-result = await spawn_agent(
-    name="翻译专家",
-    system_prompt="你是一个精通多国语言的翻译专家...",
-    provider_id="openai/gpt-4o",
-    permission_level="safe",
-    lifecycle="transient"
-)
-
-# 查看活跃子 Agent
-agents = await list_agents()
-
-# 销毁
-await delete_agent(agent_id="xxx")
-```
-
-## 许可证
+## License
 
 MIT
