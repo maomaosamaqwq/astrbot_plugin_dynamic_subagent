@@ -167,7 +167,17 @@ class DynamicSubAgentPlugin(Star):
         if self._trace_enabled:
             self._traces.setdefault(umo, []).append(entry)
 
-    def _build_sub_tools(self, permission_level: str) -> ToolSet:
+    def _get_caller_permission(self, event: AstrMessageEvent) -> str | None:
+        """获取调用者所在工具集的权限级别，优先从 session 状态判断"""
+        umo = event.unified_msg_origin
+        # 检查是否来自已注册的子 Agent 调用
+        for aid, cfg in self._store.agents.items():
+            if cfg.name and cfg.name in umo:
+                return cfg.permission_level
+        # 主 Agent 调用：full 权限
+        return "full"
+
+        def _build_sub_tools(self, permission_level: str) -> ToolSet:
         sub_tools = ToolSet()
         full_mgr = self.context.provider_manager.llm_tools
         
@@ -296,6 +306,12 @@ class DynamicSubAgentPlugin(Star):
 
         if permission_level not in _VALID_PERMISSIONS:
             return "permission_level 必须为 safe/medium/full"
+
+        # 权限越级检查：调用者不能创建比自己权限更高的子 Agent
+        caller_perm = self._get_caller_permission(event)
+        perm_rank = {"safe": 0, "medium": 1, "full": 2}
+        if perm_rank.get(permission_level, 0) > perm_rank.get(caller_perm, 0):
+            return f"权限不足：无法创建 {permission_level} 权限的子 Agent（当前权限: {caller_perm}）"
 
         if self._find_agent_by_name(name):
             return f"已有同名子 Agent [{name}]，请使用不同的名称"
