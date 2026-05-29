@@ -177,7 +177,7 @@ class DynamicSubAgentPlugin(Star):
         # 主 Agent 调用：full 权限
         return "full"
 
-    def _build_sub_tools(self, permission_level: str) -> ToolSet:
+    def _build_sub_tools(self, event: AstrMessageEvent, permission_level: str) -> ToolSet:
         sub_tools = ToolSet()
         full_mgr = self.context.provider_manager.llm_tools
         
@@ -226,7 +226,7 @@ class DynamicSubAgentPlugin(Star):
         prov_id = cfg.provider_id or await self.context.get_current_chat_provider_id(
             event.unified_msg_origin
         )
-        sub_tools = self._build_sub_tools(cfg.permission_level)
+        sub_tools = self._build_sub_tools(event, cfg.permission_level)
 
         # 构建 system prompt，注入上下文历史
         system_parts = [
