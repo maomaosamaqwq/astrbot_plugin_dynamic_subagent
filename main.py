@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 
 from astrbot.api.event import AstrMessageEvent, filter
 from astrbot.api.star import Context, Star, register
-from astrbot.core.provider.register import llm_tools
+from astrbot.core.provider.register import llm_tools, FuncCall
 from astrbot import logger
 
 # ── Data Models ──────────────────────────
@@ -106,7 +106,9 @@ class DynamicSubAgentPlugin(Star):
 
     def _register_handoff_tool(self, cfg: SubAgentConfig):
         tool_name = f"transfer_to_{cfg.name}"
-        llm_tools.add_func(
+        # 通过 self.context 注册工具，确保 handler_module_path 被正确设置
+        tool_mgr = self.context.provider_manager.llm_tools
+        tool_mgr.add_func(
             tool_name,
             [
                 {"name": "task", "type": "string",
@@ -115,9 +117,14 @@ class DynamicSubAgentPlugin(Star):
             f"将任务转交给子 Agent [{cfg.name}] 处理。{cfg.description or '无描述'}",
             self._make_handoff_handler(cfg),
         )
+        # 给工具打上 handler_module_path 标记，确保工具可见
+        tool = tool_mgr.get_func(tool_name)
+        if tool:
+            tool.handler_module_path = f"plugins.{self.name}.main"
 
     def _unregister_handoff_tool(self, name: str):
-        llm_tools.remove_func(f"transfer_to_{name}")
+        tool_mgr = self.context.provider_manager.llm_tools
+        tool_mgr.remove_func(f"transfer_to_{name}")
 
     def _make_handoff_handler(self, cfg: SubAgentConfig):
         async def handler(task: str):
