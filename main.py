@@ -48,7 +48,7 @@ _MEDIUM_BLOCKED = frozenset({
 })
 
 
-@register(name="dynamic_subagent", desc="让 AI 动态创建和管理子 Agent", author="maomaosamaqwq", version="0.6.2")
+@register(name="dynamic_subagent", desc="让 AI 动态创建和管理子 Agent", author="maomaosamaqwq", version="0.6.4")
 class DynamicSubAgentPlugin(Star):
     def __init__(self, context: Context, config: dict = None):
         super().__init__(context)
@@ -74,7 +74,7 @@ class DynamicSubAgentPlugin(Star):
     # ── Lifecycle ──
 
     async def initialize(self):
-        logger.info("DynamicSubAgent v0.6.2 已初始化")
+        logger.info("DynamicSubAgent v0.6.4 已初始化")
 
     async def terminate(self):
         self._save_all_contexts()
