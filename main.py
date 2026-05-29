@@ -7,7 +7,7 @@ from dataclasses import dataclass, field, asdict
 from datetime import datetime, timezone
 
 from astrbot.api.event import AstrMessageEvent, filter
-from astrbot.api.star import Context, Star, PluginKVStoreMixin, register
+from astrbot.api.star import Context, Star, register
 from astrbot.core.agent.agent import Agent
 from astrbot.core.agent.handoff import HandoffTool
 from astrbot.core.provider.register import llm_tools
@@ -168,7 +168,7 @@ def _format_trace_text(trace: list[dict]) -> str:
     "0.3.0",
     "https://github.com/maomaosamaqwq/astrbot_plugin_dynamic_subagent",
 )
-class DynamicSubAgentPlugin(Star, PluginKVStoreMixin):
+class DynamicSubAgentPlugin(Star):
     """Dynamic SubAgent 插件 — 让 AI 动态创建和管理子 Agent"""
 
     def __init__(self, context: Context, config: dict | None = None):
@@ -222,13 +222,22 @@ class DynamicSubAgentPlugin(Star, PluginKVStoreMixin):
         self._runtime_agents.clear()
         logger.info("DynamicSubAgent: terminated, all handoff tools removed")
 
-    # ── Persistence ────────────────────────────
+    # ── Persistence (JSON file, no PluginKVStoreMixin dependency) ──
+
+    def _store_path(self) -> str:
+        """持久化文件路径（插件目录下的 data 子目录）"""
+        import os
+        d = os.path.join(os.path.dirname(__file__), "data")
+        os.makedirs(d, exist_ok=True)
+        return os.path.join(d, "subagent_store.json")
 
     def _load_store(self) -> SubAgentStore:
         try:
-            raw = self.get(self._persist_key)
-            if raw:
-                data = json.loads(raw)
+            import os
+            p = self._store_path()
+            if os.path.exists(p):
+                with open(p, "r", encoding="utf-8") as f:
+                    data = json.load(f)
                 agents = {}
                 for aid, cfg in data.get("agents", {}).items():
                     agents[aid] = SubAgentConfig(**cfg)
@@ -242,7 +251,9 @@ class DynamicSubAgentPlugin(Star, PluginKVStoreMixin):
             data = {
                 "agents": {aid: asdict(cfg) for aid, cfg in self._store.agents.items()}
             }
-            self.put(self._persist_key, json.dumps(data, ensure_ascii=False))
+            p = self._store_path()
+            with open(p, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
         except Exception as e:
             logger.error("DynamicSubAgent: failed to save store: %s", e)
 
