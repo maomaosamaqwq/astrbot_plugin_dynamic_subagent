@@ -1,6 +1,6 @@
-# Maaya T'aan (Maya) Tsikbal
+# Maya (Maya' T'aan) — Dynamic SubAgent
 
-OpenClaw junp'éel máax yáantajo'ob AI k'abéetil k'áabal u kíimil, ti' k'aaba'ante'ex Telegram, Discord, WhatsApp beyo'. U páajtal u yáantaj yáanal máaxo'ob AI modelo beyo', ku páajtal u k'áat u yáantaj tumén ya'abach ba'alo'ob bey xooko'ob. Kaajnáal u yáantajo'ob, OpenClaw ku k'amat u yáantajo'ob tuláakal máaxo'ob k'áat u beet u yáantajil u tuukul.
+Dynamic SubAgent jun plugin AstrBot t'aan u yantajobilo' u creación y u gestión u Agent subordinados u xíimbal. Ba'ax u beetajobilo' u tres niveles aislamiento permisos (safe/medium/full) y u límite profundidad anidamiento. Ma' u yantajobilo' u Agent subordinados u crear u ts'áabal nuevos Agent, u garantiza seguridad u sistema. U soporta memoria persistente, transferencia tareas, y u seguimiento colaboración. Tumben u soporta integración herramientas MCP y u gestión ciclo vida completo.
 
 ---
-*This introduction is written in Maaya T'aan (Maya).*
+*This introduction is written in Maya (Maya' T'aan).*

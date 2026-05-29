@@ -1,6 +1,6 @@
-# ʻŌlelo Hawaiʻi Hoʻolauna
+# ʻŌlelo Hawaiʻi (ʻŌlelo Hawaiʻi) — Dynamic SubAgent
 
-He kahua wehe ʻo OpenClaw no nā kōkua AI e pili ana i nā ʻano ala memo like ʻole e like me Telegram, Discord a me WhatsApp. Kākoʻo ʻo ia i nā ʻano hoʻohālike AI he nui a hiki ke hoʻohana i nā mea hana like ʻole a me nā mākau no ka hoʻokō ʻana i nā hana. Na ke kaiāulu e alakaʻi, hoʻokipa ʻo OpenClaw i nā hāʻawi mai ka poʻe a pau e makemake ana e kūkulu i kā lākou kōkua naʻauao ponoʻī.
+ʻO Dynamic SubAgent kahi plugin no AstrBot, e hāʻawi ana i ka Agent nui e hana a mālama i nā sub-Agent me ka maʻalahi. Loaʻa i ka plugin ʻekolu pae o ka palekana (safe/medium/full) a me ka palena o ka nested depth. ʻAʻole hiki i ka sub-Agent ke hana i kahi sub-Agent hou, e hōʻoia ana i ka palekana o ka ʻōnaehana. Kākoʻo i ka hoʻomanaʻo mau, ka hoʻouna ʻana i ka hana, a me ka hahai ʻana i ka hana pū. Kākoʻo i nā mea hana MCP a me ka mālama ola piha.
 
 ---
-*This introduction is written in ʻŌlelo Hawaiʻi (Hawaiian).*
+*This introduction is written in ʻŌlelo Hawaiʻi.*

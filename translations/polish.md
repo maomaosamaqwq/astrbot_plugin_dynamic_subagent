@@ -1,6 +1,7 @@
-# Polski Wprowadzenie
+# Polski (polski) — Dynamic SubAgent
 
-OpenClaw to otwartoźródłowa platforma asystenta AI, która łączy się z różnymi kanałami komunikacji, takimi jak Telegram, Discord i WhatsApp. Obsługuje wiele modeli AI i może korzystać z różnorodnych narzędzi oraz umiejętności do wykonywania zadań. Napędzana przez społeczność, OpenClaw wita wkład wszystkich, którzy chcą zbudować własnego inteligentnego asystenta.
+Dynamic SubAgent to wtyczka AstrBot, która umożliwia głównemu agentowi dynamiczne tworzenie i zarządzanie agentami podrzędnymi. Posiada trzy poziomy izolacji uprawnień (safe/medium/full) oraz ograniczenia głębokości zagnieżdżania. Agenci podrzędni nie mogą tworzyć własnych agentów podrzędnych, co zapewnia bezpieczeństwo systemu. Wtyczka obsługuje trwałą pamięć, przekazywanie zadań i śledzenie współpracy. Wspiera również integrację narzędzi MCP oraz pełne zarządzanie cyklem życia.
 
 ---
-*This introduction is written in Polski (Polish).*
+
+*This introduction is written in Polski.*

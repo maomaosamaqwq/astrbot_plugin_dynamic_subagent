@@ -1,6 +1,6 @@
-# Avañe'ẽ (Guaraní) Jehecha
+# Guaraní (Avañe'ẽ) — Dynamic SubAgent
 
-OpenClaw peteĩ tenda AI pytyvõhára ijurujáva, oñembojoajúva heta marandu rape rupive ha'éva Telegram, Discord ha WhatsApp rehe. Oipytyvõ heta AI modelo rehe ha ikatu ojeporu heta tembiporu ha katupyry omyatãro hag̃ua tembiapo. Atyguasu omýiva, OpenClaw ohenói opavave oipotáva ojapo hag̃ua ijeheguiete pytyvõhára arandu.
+Dynamic SubAgent ha'e plugin AstrBot-pe g̃uarã, og̃uahẽ hag̃ua Agent mba'eporu sub-Agent ojapóta ha oñangarekóta. Oĩ mokõi ñe'ẽmomichĩ safety ñe'ẽmomichĩ (safe/medium/full) ha nested depth limit rehegua. Sub-Agent ndojapói sub-Agent gueteri, teknología ojapo hag̃ua sistema oĩporãvéta. Ojapo memory persistent, task transfer ha collaboration tracking. Oĩ MCP tools ha lifecycle management oĩmba.
 
 ---
-*This introduction is written in Avañe'ẽ (Guarani).*
+*This introduction is written in Guaraní.*

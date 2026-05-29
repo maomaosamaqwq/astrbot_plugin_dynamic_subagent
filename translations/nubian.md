@@ -1,6 +1,7 @@
-# Nubian (Nobiin) Takiyee
+# Nubian (نوبية) — Dynamic SubAgent
 
-OpenClaw taki gîr milîs AI amîn-ye we-ki jiri kullu Telegram, Discord, WhatsApp-n jeweertire. Taki AI modelyu takarrar gîr we-ki birsî kullu we-n taki kammaw-ki kammîr jiree. We-n deng-ki takkiar OpenClaw taki gîr auwanî takiyee amîn kammîr we-n amîn-ye we-n takki.
+Dynamic SubAgent هو إضافة AstrBot تتيح للوكيل الرئيسي إنشاء وإدارة الوكلاء الفرعيين بشكل ديناميكي. يتميز بثلاثة مستويات من الأذونات (safe/medium/full) وحدود لعمق التداخل. لا يمكن للوكلاء الفرعيين إنشاء وكلاء فرعيين آخرين، مما يضمن أمان النظام. يدعم الإضافة الذاكرة الدائمة ونقل المهام وتتبع التعاون. كما يدعم التكامل مع أدوات MCP وإدارة دورة الحياة الكاملة.
 
 ---
-*This introduction is written in Nubian (Nobiin).*
+
+*This introduction is written in Nubian.*

@@ -1,6 +1,6 @@
-# Te Reo Māori Whakatakinga
+# Māori (Te Reo Māori) — Dynamic SubAgent
 
-Ko OpenClaw he papaaho tuwhera mō ngā kaiawhina AI e hono ana ki ngā momo hongere karere pērā i a Telegram, Discord me WhatsApp. E tautoko ana i te tini o ngā tauira AI, ā, ka taea te whakamahi i ngā momo taputapu me ngā pūkenga ki te whakatutuki i ngā mahi. Nā te hapori e whakahaere, ka manaaki a OpenClaw i ngā takoha a te hunga katoa e hiahia ana ki te hanga i tō rātou ake kaiawhina mōhio.
+Ko Dynamic SubAgent he mōkihi AstrBot e whakaae ana kia hangaia, kia whakahaeretia hoki ngā Agent Tuarua e te Matua Agent. He whāinga haumarunga e toru ngā taumata (safe/medium/full) me te herenga hōhonu. Kāore ngā Agent Tuarua e āhei te hanga i ētahi atu agent, hei whakaruruhau i te haumarunga o te pūnaha. Tautokona te mahara pūmau, te tuku mahi, me te aroturuki mahi tahi. Tautokona hoki te whakakotahitanga o ngā taputapu MCP me te whakahaere katoa o te ora o te kaupapa.
 
 ---
-*This introduction is written in Te Reo Māori (Māori).*
+*This introduction is written in Māori.*

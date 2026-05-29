@@ -1,6 +1,6 @@
-# Limba moldovenească Introducere
+# Moldovenească (Limba Moldovenească) — Dynamic SubAgent
 
-OpenClaw este o platformă open-source pentru asistenți AI care se conectează la diverse canale de mesagerie precum Telegram, Discord și WhatsApp. Suportă multiple modele AI și poate utiliza o gamă largă de instrumente și abilități pentru a îndeplini sarcini. Condusă de comunitate, OpenClaw salută contribuțiile tuturor celor care doresc să-și construiască propriul asistent inteligent.
+Dynamic SubAgent este un plugin AstrBot care permite Agentului Principal să creeze și să gestioneze dinamic agenți secundari. Plugin-ul dispune de trei niveluri de izolare a permisiunilor (safe/medium/full) și limitare a adâncimii de imbricare. Agenții secundari nu pot crea alți agenți, asigurând astfel securitatea sistemului. Suportă memorie persistentă, transfer de sarcini și urmărirea colaborării. De asemenea, suportă integrarea instrumentelor MCP și gestionarea completă a ciclului de viață.
 
 ---
-*This introduction is written in Limba moldovenească (Moldovan).*
+*This introduction is written in Moldovenească.*

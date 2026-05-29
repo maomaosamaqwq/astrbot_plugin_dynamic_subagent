@@ -1,6 +1,6 @@
-# Hausa Gabatarwa
+# Hausa (Hausa) — Dynamic SubAgent
 
-OpenClaw wani dandali ne na budaddiyar tushen mataimakin AI wanda ke haɗawa da hanyoyin saƙo daban-daban kamar Telegram, Discord da WhatsApp. Yana tallafawa nau'ikan samfuran AI da yawa kuma yana iya amfani da kayan aiki da ƙwarewa daban-daban don aiwatar da ayyuka. Wanda al'umma ke tafiyar da shi, OpenClaw yana maraba da gudunmawar duk wanda ke son gina mataimakinsa na fasaha.
+Dynamic SubAgent wani plugin ne na AstrBot wanda ke ba da damar Agent babba ya ƙirƙira kuma ya sarrafa sub-Agent a hanyar da ta dace. Plugin yana da matakai uku na rarraba izini (safe/medium/full) da kuma iyakar zurfin nested. Sub-Agent ba zai iya ƙirƙirar sub-Agent ba, wanda ke tabbatar da tsaro na tsarin. Yana tallafawa tunawa mai dorewa, canja wurin aiki, da bin diddigin aiki tare. Yana tallafawa kayan MCP da gudanar da rayuwar cikakkiyar.
 
 ---
-*This introduction is written in Hausa (Hausa).*
+*This introduction is written in Hausa.*

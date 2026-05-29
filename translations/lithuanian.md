@@ -1,6 +1,6 @@
-# Lietuvių kalba Įvadas
+# Lietuvių (Lietuvių) — Dynamic SubAgent
 
-OpenClaw yra atvirojo kodo AI asistento platforma, kuri jungiasi prie įvairių pranešimų kanalų, tokių kaip Telegram, Discord ir WhatsApp. Ji palaiko kelis AI modelius ir gali naudoti įvairius įrankius bei įgūdžius užduotims atlikti. Bendruomenės valdoma OpenClaw sveikina visų, norinčių susikurti savo protingą asistentą, indėlį.
+Dynamic SubAgent yra AstrBot papildinys, leidžiantis pagrindiniam Agentui dinamiškai kurti ir valdyti sub-Agentus. Papildinys turi trijų lygių leidimų izoliaciją (safe/medium/full) ir įterpimo gylio apribojimą. Sub-Agent negali kurti naujų sub-Agentų, užtikrinant sistemos saugumą. Palaiko nuolatinę atmintį, užduočių perdavimą ir bendradarbiavimo sekimą. Palaiko MCP įrankius ir visą gyvavimo ciklo valdymą.
 
 ---
-*This introduction is written in Lietuvių kalba (Lithuanian).*
+*This introduction is written in Lithuanian.*

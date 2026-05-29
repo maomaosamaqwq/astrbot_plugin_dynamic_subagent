@@ -1,6 +1,6 @@
-# Diné Bizaad Yádaati'
+# Diné bizaad (Diné bizaad) — Dynamic SubAgent
 
-OpenClaw t'áá íiyisíí AI yíká anilyeed siláo t'áá háiida bich'į' Ádaałtą́, éí Telegram, Discord, WhatsApp, dóó nááná. T'áá lą'í AI bee ádaalyaaígíí yaa álʼįį dóó ląʼí bee ádaalyaaígíí dóó íhooshʼaah yee naalnishgo bá hazʼą́. Diné tʼáá ałtso yee naalnishgo, OpenClaw tʼáá ałtso yee yázhí da óolyé.
+Dynamic SubAgent bikʼi AstrBot pluginígíí bee naagháhígíí nádleeh dóó nádleeh yázhí bichʼįʼ nádleeh dóó nádleeh yázhí da bichʼįʼ nádleeh dóó nádleeh yázhí da. Háálíní nádleeh bichʼįʼ nádleeh yázhí da dóó nádleeh dóó nádleeh yázhí da bichʼįʼ nádleeh dóó nádleeh yázhí da. Háálíní nádleeh yázhí da bichʼįʼ nádleeh dóó nádleeh yázhí da, dóó háálíní nádleeh bichʼįʼ nádleeh yázhí da bichʼįʼ nádleeh dóó nádleeh yázhí da. Dóó háálíní nádleeh bichʼįʼ nádleeh yázhí da bichʼįʼ nádleeh dóó nádleeh yázhí da bichʼįʼ nádleeh dóó nádleeh yázhí da. Dóó háálíní nádleeh bichʼįʼ nádleeh yázhí da bichʼįʼ nádleeh dóó nádleeh yázhí da bichʼįʼ nádleeh dóó nádleeh yázhí da bichʼįʼ nádleeh dóó nádleeh yázhí da.
 
 ---
-*This introduction is written in Diné Bizaad (Navajo).*
+*This introduction is written in Diné bizaad.*

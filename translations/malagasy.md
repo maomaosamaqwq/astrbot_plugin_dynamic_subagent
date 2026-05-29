@@ -1,6 +1,6 @@
-# Malagasy Fampidirana
+# Malagasy (Malagasy) — Dynamic SubAgent
 
-OpenClaw dia sehatra misokatra ho an'ny mpanampy AI izay mampifandray amin'ny fantsona hafatra isan-karazany toy ny Telegram, Discord ary WhatsApp. Manohana maodely AI maro izy ary afaka mampiasa fitaovana sy fahaizana isan-karazany hanatanterahana asa. Entin'ny vondrom-piarahamonina, OpenClaw dia mandray ny fandraisan'anjaran'izay rehetra te-hanangana ny mpanampy manan-tsaina azy manokana.
+Dynamic SubAgent dia plugin ho an'i AstrBot izay mahafaka ny Agent lehibe hanamboarana sy hanaovanana sub-Agent amin'ny fomba tsy voafetra. Manana ambaratonga telo ny fanasitranana fahamarinana (safe/medium/full) sy fetra lalina nested ny plugin. Tsy afaka manamboatra sub-Agent hafa ny sub-Agent, izay manamarina ny fiarovana ny rafitra. Manohana ny fahatsiarovana maharitra, ny fampifamindrana asa, ary ny fandinihana ny fiaraha-miasa. Manohana ny fitaovana MCP ary ny fitantanana velona feno.
 
 ---
-*This introduction is written in Malagasy (Malagasy).*
+*This introduction is written in Malagasy.*
