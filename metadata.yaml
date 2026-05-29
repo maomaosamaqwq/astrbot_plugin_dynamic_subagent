@@ -1,0 +1,23 @@
+name: dynamic_subagent
+author: maomaosamaqwq
+version: 0.1.0
+description: 让 AI 可以通过 tool call 动态创建和管理子 Agent
+repo: https://github.com/maomaosamaqwq/astrbot_plugin_dynamic_subagent
+
+# 插件配置项
+config:
+  model_blacklist:
+    type: list
+    default: []
+    description: 模型黑名单，AI 创建子 Agent 时不能选择这些模型
+  model_filter_mode:
+    type: string
+    default: blacklist
+    description: 模型过滤模式，blacklist（黑名单）或 whitelist（白名单）
+    options:
+      - blacklist
+      - whitelist
+  allowed_models:
+    type: list
+    default: []
+    description: 模型白名单（仅 whitelist 模式生效）
