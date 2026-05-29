@@ -102,6 +102,9 @@ class DynamicSubAgentPlugin(Star):
         self._restore_persistent_agents()
         self._cleanup_stale_tools()
 
+        # 注册 WebUI API 路由
+        self._register_web_apis()
+
     # ──────────────────────────────────────────
     # Persistence helpers
     # ──────────────────────────────────────────
@@ -201,7 +204,120 @@ class DynamicSubAgentPlugin(Star):
         return True
 
     # ──────────────────────────────────────────
-    # Tools
+    # WebUI API routes
+    # ──────────────────────────────────────────
+
+    def _serialize(self, cfg: SubAgentConfig, registered: bool = True) -> dict:
+        return {
+            "agent_id": cfg.agent_id,
+            "name": cfg.name,
+            "system_prompt": cfg.system_prompt,
+            "provider_id": cfg.provider_id,
+            "permission_level": cfg.permission_level,
+            "lifecycle": cfg.lifecycle,
+            "tools": cfg.tools,
+            "tool_name": cfg.tool_name,
+            "registered": registered,
+            "created_at": cfg.created_at,
+        }
+
+    def _register_web_apis(self):
+        """注册 Web API 路由供前端调用"""
+        try:
+            ctx = getattr(self, "context", None)
+            if ctx is None or not hasattr(ctx, "register_web_api"):
+                return
+
+            # GET /plugin/subagent/list
+            async def list_api():
+                agents = []
+                for cfg in self._runtime_agents.values():
+                    agents.append(self._serialize(cfg, True))
+                for cfg in self._store.agents.values():
+                    registered = any(
+                        isinstance(f, HandoffTool) and f.name == cfg.tool_name
+                        for f in llm_tools.func_list
+                    )
+                    agents.append(self._serialize(cfg, registered))
+                return {"status": "ok", "data": agents}
+
+            # POST /plugin/subagent/create
+            async def create_api(
+                name: str = "",
+                system_prompt: str = "",
+                provider_id: str = "",
+                permission_level: str = "safe",
+                lifecycle: str = "transient",
+                tools: list[str] | None = None,
+            ):
+                if not name:
+                    return {"status": "error", "message": "名称不能为空"}
+                if provider_id and not self._is_model_allowed(provider_id):
+                    return {
+                        "status": "error",
+                        "message": f"模型 {provider_id} 被禁止",
+                    }
+                cfg = SubAgentConfig(
+                    name=name,
+                    system_prompt=system_prompt,
+                    provider_id=provider_id or None,
+                    permission_level=permission_level,
+                    lifecycle=lifecycle,
+                    tools=tools,
+                )
+                self._register_handoff_tool(cfg)
+                if lifecycle == "persistent":
+                    self._store.agents[cfg.agent_id] = cfg
+                    self._save_store()
+                else:
+                    self._runtime_agents[cfg.agent_id] = cfg
+                return {
+                    "status": "ok",
+                    "data": self._serialize(cfg, True),
+                    "message": f"子 Agent {name} 创建成功",
+                }
+
+            # POST /plugin/subagent/delete
+            async def delete_api(agent_id: str = ""):
+                if not agent_id:
+                    return {"status": "error", "message": "agent_id 不能为空"}
+                if agent_id in self._runtime_agents:
+                    cfg = self._runtime_agents[agent_id]
+                    self._remove_handoff_tool(cfg.tool_name)
+                    del self._runtime_agents[agent_id]
+                    return {"status": "ok", "message": f"子 Agent {cfg.name} 已销毁"}
+                if agent_id in self._store.agents:
+                    cfg = self._store.agents[agent_id]
+                    self._remove_handoff_tool(cfg.tool_name)
+                    del self._store.agents[agent_id]
+                    self._save_store()
+                    return {
+                        "status": "ok",
+                        "message": f"持久化子 Agent {cfg.name} 已销毁",
+                    }
+                return {"status": "error", "message": "未找到该子 Agent"}
+
+            ctx.register_web_api(
+                "/plugin/subagent/list", list_api, ["GET"], "获取子 Agent 列表"
+            )
+            ctx.register_web_api(
+                "/plugin/subagent/create",
+                create_api,
+                ["POST"],
+                "创建子 Agent",
+            )
+            ctx.register_web_api(
+                "/plugin/subagent/delete",
+                delete_api,
+                ["POST"],
+                "删除子 Agent",
+            )
+            logger.info("DynamicSubAgent: registered 3 WebUI API routes")
+        except Exception as e:
+            logger.error(f"DynamicSubAgent: failed to register WebUI routes: {e}")
+
+    # ──────────────────────────────────────────
+    # AI Tools
     # ──────────────────────────────────────────
 
     @filter.llm_tool(
