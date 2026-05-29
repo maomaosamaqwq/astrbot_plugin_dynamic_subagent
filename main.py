@@ -9,7 +9,6 @@ from datetime import datetime, timezone
 
 from astrbot.api.event import AstrMessageEvent, filter
 from astrbot.api.star import Context, Star, register
-from astrbot.core.provider.register import llm_tools
 from astrbot.core.agent.tool import ToolSet
 from astrbot import logger
 
@@ -45,7 +44,7 @@ _MAX_SPAWN = 10
 _MAX_TRACE = 50
 
 
-@register(name="dynamic_subagent", desc="让 AI 动态创建和管理子 Agent", author="maomaosamaqwq", version="0.5.5")
+@register(name="dynamic_subagent", desc="让 AI 动态创建和管理子 Agent", author="maomaosamaqwq", version="0.5.6")
 class DynamicSubAgentPlugin(Star):
     def __init__(self, context: Context, config: dict = None):
         super().__init__(context)
@@ -59,12 +58,11 @@ class DynamicSubAgentPlugin(Star):
         self._sub_results: dict[str, list[dict]] = {}
 
         self._load_store()
-        self._restore_agents()
 
     # ── Lifecycle ──
 
     async def initialize(self):
-        logger.info("DynamicSubAgent v0.5.5 已初始化")
+        logger.info("DynamicSubAgent v0.5.6 已初始化")
 
     async def terminate(self):
         logger.info("DynamicSubAgent 已停止")
@@ -97,112 +95,6 @@ class DynamicSubAgentPlugin(Star):
         except Exception as e:
             logger.error(f"DynamicSubAgent: 保存持久化失败: {e}")
 
-    def _restore_agents(self):
-        """启动时恢复 persistent agent 的 tool 注册"""
-        restored = 0
-        for aid, cfg in list(self._store.agents.items()):
-            self._register_handoff_tool(cfg)
-            restored += 1
-        if restored:
-            logger.info(f"DynamicSubAgent: 已恢复 {restored} 个持久化子 Agent")
-
-    # ── Handoff Tool Registration ──
-
-    def _register_handoff_tool(self, cfg: SubAgentConfig):
-        tool_name = f"transfer_to_{cfg.name}"
-        tool_mgr = self.context.provider_manager.llm_tools
-        tool_mgr.add_func(
-            tool_name,
-            [
-                {"name": "task", "type": "string",
-                 "description": f"交给子 Agent [{cfg.name}] 的任务描述，应包含完整的上下文和指令。"},
-            ],
-            f"将任务转交给子 Agent [{cfg.name}] 处理。{cfg.description or '无描述'}",
-            self._make_handoff_handler(cfg),
-        )
-
-    def _unregister_handoff_tool(self, name: str):
-        tool_mgr = self.context.provider_manager.llm_tools
-        tool_mgr.remove_func(f"transfer_to_{name}")
-
-    def _make_handoff_handler(self, cfg: SubAgentConfig):
-        plugin_ref = self  # 捕获插件实例引用
-
-        async def handler(event, task: str = ""):
-            if not task:
-                return f"请提供要交给子 Agent [{cfg.name}] 的任务内容。"
-
-            try:
-                # 获取 provider
-                prov_id = cfg.provider_id or await plugin_ref.context.get_current_chat_provider_id(
-                    event.unified_msg_origin
-                )
-
-                # 构建子 Agent 的工具集（与 spawn_agent 一致）
-                sub_tools = ToolSet()
-                full_mgr = plugin_ref.context.provider_manager.llm_tools
-                if cfg.permission_level == "safe":
-                    for t in full_mgr.func_list:
-                        if t.name in ("astrbot_web_search", "brave_web_search", "tavily_web_search", "bocha_web_search", "spawn_agent", "list_agents"):
-                            sub_tools.add_tool(t)
-                elif cfg.permission_level == "medium":
-                    for t in full_mgr.func_list:
-                        if t.name not in ("shell_exec", "local_python_exec", "execute_shell", "run_python") and not t.name.startswith("transfer_to_"):
-                            sub_tools.add_tool(t)
-                else:
-                    for t in full_mgr.func_list:
-                        if not t.name.startswith("transfer_to_"):
-                            sub_tools.add_tool(t)
-
-                system_prompt = (
-                    f"你是子 Agent [{cfg.name}]。\n"
-                    f"描述: {cfg.description}\n"
-                    f"指令: {cfg.instruction}\n"
-                    f"请根据任务使用合适的工具完成工作。"
-                )
-
-                llm_resp = await plugin_ref.context.tool_loop_agent(
-                    event=event,
-                    chat_provider_id=prov_id,
-                    prompt=task,
-                    system_prompt=system_prompt,
-                    tools=sub_tools,
-                )
-                result_text = llm_resp.completion_text if llm_resp else "(无返回结果)"
-
-                # ── Bug #2 修复：持久化子 Agent 执行结果 ──
-                umo = event.unified_msg_origin
-                plugin_ref._sub_results.setdefault(umo, []).append({
-                    "agent_name": cfg.name,
-                    "agent_id": cfg.id,
-                    "task": task,
-                    "result": result_text,
-                    "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S"),
-                })
-
-                # 更新追踪
-                plugin_ref._traces.setdefault(umo, []).append({
-                    "agent_name": cfg.name,
-                    "agent_id": cfg.id,
-                    "action": "transfer",
-                    "task": task,
-                    "status": "completed",
-                    "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S"),
-                })
-
-                return (
-                    f"子 Agent [{cfg.name}] 执行完成。\n"
-                    f"任务: {task}\n"
-                    f"结果:\n{result_text}"
-                )
-            except Exception as e:
-                logger.error(f"DynamicSubAgent: transfer_to_{cfg.name} 执行失败: {e}")
-                return f"子 Agent [{cfg.name}] 执行任务时出错: {e}"
-
-        handler.__name__ = f"handoff_{cfg.name}"
-        handler.__module__ = __name__
-        return handler
-
     # ── Helper: 查找 agent ──
 
     def _find_agent_by_name(self, name: str) -> str | None:
@@ -210,6 +102,46 @@ class DynamicSubAgentPlugin(Star):
             if cfg.name == name:
                 return aid
         return None
+
+    # ── Helper: 构建子 Agent 工具集 ──
+
+    def _build_sub_tools(self, permission_level: str) -> ToolSet:
+        sub_tools = ToolSet()
+        full_mgr = self.context.provider_manager.llm_tools
+        if permission_level == "safe":
+            for t in full_mgr.func_list:
+                if t.name in ("astrbot_web_search", "brave_web_search", "tavily_web_search", "bocha_web_search", "spawn_agent", "list_agents"):
+                    sub_tools.add_tool(t)
+        elif permission_level == "medium":
+            for t in full_mgr.func_list:
+                if t.name not in ("shell_exec", "local_python_exec", "execute_shell", "run_python"):
+                    sub_tools.add_tool(t)
+        else:
+            for t in full_mgr.func_list:
+                sub_tools.add_tool(t)
+        return sub_tools
+
+    # ── Helper: 执行子 Agent 任务 ──
+
+    async def _execute_sub_agent(self, event: AstrMessageEvent, cfg: SubAgentConfig, task: str) -> str:
+        prov_id = cfg.provider_id or await self.context.get_current_chat_provider_id(
+            event.unified_msg_origin
+        )
+        sub_tools = self._build_sub_tools(cfg.permission_level)
+        system_prompt = (
+            f"你是子 Agent [{cfg.name}]。\n"
+            f"描述: {cfg.description}\n"
+            f"指令: {cfg.instruction}\n"
+            f"请根据任务使用合适的工具完成工作。"
+        )
+        llm_resp = await self.context.tool_loop_agent(
+            event=event,
+            chat_provider_id=prov_id,
+            prompt=task,
+            system_prompt=system_prompt,
+            tools=sub_tools,
+        )
+        return llm_resp.completion_text if llm_resp else "(无返回结果)"
 
     # ── LLM Tools ──
 
@@ -227,16 +159,15 @@ class DynamicSubAgentPlugin(Star):
         persistent: bool = False,
     ):
         """
-        动态创建一个子 Agent，并注册为 handoff tool。
+        动态创建一个子 Agent。
 
         如果同时传入 task 参数，创建后会自动让子 Agent 执行该任务并返回结果。
-        如果不传 task，则仅注册，可在下一轮对话中通过 transfer_to_{name}
-        手动调用。
+        如果不传 task，则仅注册，后续可通过 transfer_to_agent(name="xxx", task="...") 调用。
 
         建议传 task 一步到位，让子 Agent 创建后立即执行。
 
         Args:
-            name(string): 子 Agent 名称（英文/数字/下划线，用作 handoff tool 命名）
+            name(string): 子 Agent 名称（英文/数字/下划线，用作标识）
             description(string): 子 Agent 的功能描述
             instruction(string): 子 Agent 的系统指令/行为约束
             task(string): 交给子 Agent 的任务内容。如果提供，创建后立即执行
@@ -245,7 +176,6 @@ class DynamicSubAgentPlugin(Star):
             model(string): 使用的模型名，不传则继承主 Agent
             persistent(boolean): 是否持久化（跨重启），默认 false
         """
-        # Bug #5 fix: 用 len(_spawned_ids) 判断配额，非 _spawn_count
         if len(self._spawned_ids) >= _MAX_SPAWN:
             return f"已达到子 Agent 创建上限（{_MAX_SPAWN}），无法创建"
 
@@ -253,13 +183,11 @@ class DynamicSubAgentPlugin(Star):
             return "name 必须是合法标识符（英文/数字/下划线，不能以数字开头）"
 
         if permission_level not in _PERMISSION_TOOLS:
-            return f"permission_level 必须为 safe/medium/full"
+            return "permission_level 必须为 safe/medium/full"
 
-        # name 去重
         if self._find_agent_by_name(name):
             return f"已有同名子 Agent [{name}]，请使用不同的名称"
 
-        # 字符串转布尔（LLM tool 传入的 persistent 可能是 "true"/"false" 字符串）
         if isinstance(persistent, str):
             persistent = persistent.lower() in ("true", "1", "yes")
 
@@ -272,72 +200,32 @@ class DynamicSubAgentPlugin(Star):
             created_at=now, updated_at=now,
         )
 
-        self._register_handoff_tool(cfg)
         self._store.agents[agent_id] = cfg
-        # Bug #5 fix: 记录创建 id
         self._spawned_ids.add(agent_id)
 
         if persistent:
             self._save_store()
 
-        # Bug #3 fix: 记录协作追踪
         self._traces.setdefault(event.unified_msg_origin, []).append({
-            "agent_name": name,
-            "agent_id": agent_id,
-            "action": "spawn",
-            "task": task or "(无任务)",
+            "agent_name": name, "agent_id": agent_id,
+            "action": "spawn", "task": task or "(无任务)",
             "status": "created",
             "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S"),
         })
 
-        # ── 如果有 task，立即让子 Agent 执行 ──
+        # ── 如果有 task，立即执行 ──
         if task:
             try:
-                # 获取 provider
-                prov_id = provider_id or await self.context.get_current_chat_provider_id(
-                    event.unified_msg_origin
-                )
-                
-                # 构建子 Agent 的工具集
-                sub_tools = ToolSet()
-                
-                # 获取所有可用工具
-                full_mgr = self.context.provider_manager.llm_tools
-                if permission_level == "safe":
-                    # safe 只加 web search 类 + spawn_agent（允许嵌套）
-                    for t in full_mgr.func_list:
-                        if t.name in ("astrbot_web_search", "brave_web_search", "tavily_web_search", "bocha_web_search", "spawn_agent", "list_agents"):
-                            sub_tools.add_tool(t)
-                elif permission_level == "medium":
-                    # medium 排除 shell/Python，但保留 spawn_agent
-                    for t in full_mgr.func_list:
-                        if t.name not in ("shell_exec", "local_python_exec", "execute_shell", "run_python") and not t.name.startswith("transfer_to_"):
-                            sub_tools.add_tool(t)
-                else:
-                    # full 全量（排除 transfer_to_ 防止混乱）
-                    for t in full_mgr.func_list:
-                        if not t.name.startswith("transfer_to_"):
-                            sub_tools.add_tool(t)
-                
-                system_prompt = (
-                    f"你是子 Agent [{name}]。\n"
-                    f"描述: {description}\n"
-                    f"指令: {instruction}\n"
-                    f"请根据任务使用合适的工具完成工作。"
-                )
-                
-                llm_resp = await self.context.tool_loop_agent(
-                    event=event,
-                    chat_provider_id=prov_id,
-                    prompt=task,
-                    system_prompt=system_prompt,
-                    tools=sub_tools,
-                )
-                result_text = llm_resp.completion_text if llm_resp else "(无返回结果)"
-                
-                # Bug #3 fix: 更新追踪状态
+                result_text = await self._execute_sub_agent(event, cfg, task)
                 self._traces[event.unified_msg_origin][-1]["status"] = "completed"
-                
+
+                # 持久化结果
+                self._sub_results.setdefault(event.unified_msg_origin, []).append({
+                    "agent_name": name, "agent_id": agent_id,
+                    "task": task, "result": result_text,
+                    "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S"),
+                })
+
                 return (
                     f"子 Agent [{name}] 创建并执行任务完成！\n"
                     f"任务: {task}\n"
@@ -348,7 +236,7 @@ class DynamicSubAgentPlugin(Star):
                 self._traces[event.unified_msg_origin][-1]["status"] = f"failed: {e}"
                 return (
                     f"子 Agent [{name}] 创建成功，但执行任务时出错: {e}\n"
-                    f"可通过 transfer_to_{name} 重新尝试。"
+                    f"可通过 transfer_to_agent(name=\"{name}\", task=\"...\") 重新尝试。"
                 )
 
         return (
@@ -356,9 +244,68 @@ class DynamicSubAgentPlugin(Star):
             f"  类型: {'persistent' if persistent else 'transient'}\n"
             f"  权限: {permission_level}\n"
             f"  描述: {description}\n"
-            f"  handoff tool: transfer_to_{name}\n"
-            f"创建已完成。请告知用户子 Agent 已就绪，用户在下一轮消息中可使用 transfer_to_{name} 来调用它。"
+            f"调用方式: transfer_to_agent(name=\"{name}\", task=\"你的任务描述\")"
         )
+
+    @filter.llm_tool()
+    async def transfer_to_agent(
+        self,
+        event: AstrMessageEvent,
+        name: str = "",
+        task: str = "",
+    ):
+        """
+        将任务转交给已创建的子 Agent 执行。
+
+        调用前请确保子 Agent 已通过 spawn_agent 创建。
+
+        Args:
+            name(string): 子 Agent 名称（需与 spawn_agent 时的 name 一致）
+            task(string): 要交给子 Agent 的任务描述，应包含完整上下文和指令
+        """
+        if not name:
+            return "请指定子 Agent 名称（name 参数）"
+        if not task:
+            return "请提供任务内容（task 参数）"
+
+        aid = self._find_agent_by_name(name)
+        if not aid:
+            available = [cfg.name for cfg in self._store.agents.values()]
+            hint = f"，可用的子 Agent: {available}" if available else "，当前无活跃子 Agent"
+            return f"未找到名为 [{name}] 的子 Agent{hint}"
+
+        cfg = self._store.agents[aid]
+
+        # 追踪
+        self._traces.setdefault(event.unified_msg_origin, []).append({
+            "agent_name": name, "agent_id": cfg.id,
+            "action": "transfer", "task": task,
+            "status": "running",
+            "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S"),
+        })
+
+        try:
+            result_text = await self._execute_sub_agent(event, cfg, task)
+
+            # 更新追踪
+            self._traces[event.unified_msg_origin][-1]["status"] = "completed"
+
+            # 持久化结果
+            self._sub_results.setdefault(event.unified_msg_origin, []).append({
+                "agent_name": name, "agent_id": cfg.id,
+                "task": task, "result": result_text,
+                "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S"),
+            })
+
+            return (
+                f"子 Agent [{name}] 执行完成。\n"
+                f"任务: {task}\n"
+                f"结果:\n{result_text}"
+            )
+        except Exception as e:
+            logger.error(f"DynamicSubAgent: transfer_to_agent({name}) 执行失败: {e}")
+            self._traces[event.unified_msg_origin][-1]["status"] = f"failed: {e}"
+            return f"子 Agent [{name}] 执行任务时出错: {e}"
 
     @filter.llm_tool()
     async def list_agents(self, event: AstrMessageEvent):
@@ -366,18 +313,14 @@ class DynamicSubAgentPlugin(Star):
         if not self._store.agents:
             return "当前没有活跃的子 Agent"
 
-        tool_mgr = self.context.provider_manager.llm_tools
         lines = ["当前活跃的子 Agent:"]
         for aid, cfg in self._store.agents.items():
-            registered = any(
-                t.name == f"transfer_to_{cfg.name}" for t in tool_mgr.func_list
-            )
-            status_mark = "[可用]" if registered else "[未注册]"
             lines.append(
                 f"  [{cfg.name}] 权限:{cfg.permission_level} "
-                f"{status_mark}"
+                f"描述:{cfg.description or '无'}"
             )
         lines.append(f"\n总共: {len(self._store.agents)} 个")
+        lines.append("\n调用方式: transfer_to_agent(name=\"Agent名称\", task=\"任务描述\")")
         return "\n".join(lines)
 
     @filter.llm_tool()
@@ -387,7 +330,7 @@ class DynamicSubAgentPlugin(Star):
         name: str = "",
     ):
         """
-        销毁指定的子 Agent，同时注销其 handoff tool。
+        销毁指定的子 Agent。
 
         Args:
             name(string): 要销毁的子 Agent 名称
@@ -399,12 +342,10 @@ class DynamicSubAgentPlugin(Star):
         if not found:
             return f"未找到名为 [{name}] 的子 Agent"
 
-        # Bug #5 fix: 删除时归还配额
         self._spawned_ids.discard(found)
         del self._store.agents[found]
-        self._unregister_handoff_tool(name)
         self._save_store()
-        return f"子 Agent [{name}] 已销毁并注销 handoff tool，创建配额已归还"
+        return f"子 Agent [{name}] 已销毁，创建配额已归还"
 
     @filter.llm_tool()
     async def show_collaboration_report(self, event: AstrMessageEvent):
@@ -435,7 +376,7 @@ class DynamicSubAgentPlugin(Star):
         limit: int = 5,
     ):
         """
-        查询子 Agent 的历史执行结果（解决跨 Agent 记忆不互通问题）。
+        查询子 Agent 的历史执行结果。
 
         Args:
             name(string): 子 Agent 名称，不传则返回所有子 Agent 的结果
