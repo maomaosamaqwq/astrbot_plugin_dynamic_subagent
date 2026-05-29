@@ -44,7 +44,7 @@ _MAX_SPAWN = 10
 _MAX_TRACE = 50
 
 
-@register(name="dynamic_subagent", desc="让 AI 动态创建和管理子 Agent", author="maomaosamaqwq", version="0.5.0")
+@register(name="dynamic_subagent", desc="让 AI 动态创建和管理子 Agent", author="maomaosamaqwq", version="0.5.1")
 class DynamicSubAgentPlugin(Star):
     def __init__(self, context: Context, config: dict = None):
         super().__init__(context)
@@ -60,7 +60,7 @@ class DynamicSubAgentPlugin(Star):
     # ── Lifecycle ──
 
     async def initialize(self):
-        logger.info("DynamicSubAgent v0.5.0 已初始化")
+        logger.info("DynamicSubAgent v0.5.1 已初始化")
 
     async def terminate(self):
         logger.info("DynamicSubAgent 已停止")
@@ -166,6 +166,10 @@ class DynamicSubAgentPlugin(Star):
         """
         动态创建一个子 Agent，并注册为 handoff tool。
 
+        注意：创建成功后，transfer_to_{name} 工具会在下一次对话回合中生效。
+        创建后请回复用户提示用户发送下一条消息来使用 handoff 功能，
+        **不要尝试在同一轮对话中立即调用 transfer_to_{name}**。
+
         Args:
             name(string): 子 Agent 名称（英文/数字/下划线，用作 handoff tool 命名）
             description(string): 子 Agent 的功能描述
@@ -215,7 +219,8 @@ class DynamicSubAgentPlugin(Star):
             f"  权限: {permission_level}\n"
             f"  描述: {description}\n"
             f"  handoff tool: transfer_to_{name}\n"
-            f"现在可以通过 transfer_to_{name}(task=...) 将任务交给它。"
+            f"创建已完成，请回复用户说子 Agent 已就绪，让用户发送下一条消息来使用 transfer_to_{name}，"
+            f"不要尝试在本轮对话中调用它。"
         )
 
     @filter.llm_tool()
