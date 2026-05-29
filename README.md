@@ -1,119 +1,104 @@
-# Dynamic SubAgent Plugin / 动态子代理插件
+# 🐾 Dynamic SubAgent
 
-让 AI 可以通过 **tool call 动态创建和管理子 Agent**，支持跨调用上下文保留、权限分级、协作追踪。
+[![Version](https://img.shields.io/github/v/release/maomaosamaqwq/astrbot_plugin_dynamic_subagent)](https://github.com/maomaosamaqwq/astrbot_plugin_dynamic_subagent/releases)
+[![Stars](https://img.shields.io/github/stars/maomaosamaqwq/astrbot_plugin_dynamic_subagent)](https://github.com/maomaosamaqwq/astrbot_plugin_dynamic_subagent)
+[![License](https://img.shields.io/github/license/maomaosamaqwq/astrbot_plugin_dynamic_subagent)](https://github.com/maomaosamaqwq/astrbot_plugin_dynamic_subagent/blob/master/LICENSE)
 
-## 功能
+让 AI 主 Agent 动态创建和管理子 Agent 的 AstrBot 插件，具备**权限隔离**与**嵌套深度限制**的安全体系。
 
-- **动态创建** — AI 调用 `spawn_agent` 创建子 Agent，即刻可用
-- **统一转交** — 通过 `transfer_to_agent(name, task)` 向任意子 Agent 分配任务
-- **上下文保留** — persistent Agent 的对话历史跨调用保留，Agent 能记住之前的事
-- **双生命周期** — transient（内存级，用完即焚）/ persistent（持久化，重启恢复）
-- **权限分级** — safe（只读工具）/ medium（排除 shell）/ full（全部工具）
-- **模型过滤** — 黑名单/白名单，防止 AI 选到昂贵或不稳定的模型
-- **协作追踪** — 记录子 Agent 调用链路，可查看协作报告
-- **安全熔断** — spawn 上限、参数校验
+## ✨ 特性
 
-## 安装
+| 特性 | 说明 |
+|------|------|
+| 🧠 动态创建 | `spawn_agent` 按需创建子 Agent，支持指定权限/模型/持久化 |
+| 🔄 任务移交 | `transfer_to_agent` 将任务交给已有子 Agent 执行 |
+| 🔒 权限隔离 | `safe` / `medium` / `full` 三级权限，子 Agent 不可越级 |
+| 🛡 深度限制 | 子 Agent 无权再创建子 Agent，杜绝无限繁殖链 |
+| 💾 持久化记忆 | persistent Agent 跨重启保留 + 上下文历史注入 |
+| 🕵️ 协作追踪 | 完整的 spawn/transfer 链路追踪报告 |
+
+## ⚙️ 权限体系
+
+| 权限 | 内置工具 | 插件工具 | 可 spawn | 说明 |
+|:----:|:--------:|:--------:|:--------:|------|
+| `safe` | ❌ | 白名单 | ❌ | 仅搜索+管理工具 |
+| `medium` | 文件读写 | 黑名单过滤 | ❌ | 不含 shell/python |
+| `full` | ✅ 全部 | ✅ 全部 | ❌ | 与主 Agent 一致 |
+
+> 子 Agent 永远无法使用 Python/IPython 执行器，且无法创建子 Agent。
+
+## 📦 安装
+
+在 AstrBot 插件市场搜索 `dynamic_subagent` 安装，或手动克隆：
 
 ```bash
 git clone https://github.com/maomaosamaqwq/astrbot_plugin_dynamic_subagent.git
 ```
 
-在 AstrBot WebUI → 插件管理 → 加载插件。
+## 🚀 快速开始
 
-## 前置条件
+```python
+# 1. 创建子 Agent（带任务立即执行）
+spawn_agent(
+    name="code_reviewer",
+    description="代码审查助手",
+    permission_level="medium",
+    task="请审查以下代码：..."
+)
 
-- AstrBot **v3.5.19+**
+# 2. 创建持久化子 Agent，后续移交任务
+spawn_agent(
+    name="memory_bot",
+    description="记忆型助手，会记住之前的对话",
+    persistent=true
+)
 
-## AI 可用工具
+transfer_to_agent(
+    name="memory_bot",
+    task="继续之前的话题..."
+)
 
-| 工具 | 描述 |
+# 3. 查看协作报告
+show_collaboration_report()
+```
+
+## ⚙️ 配置
+
+| 配置项 | 默认值 | 说明 |
+|--------|:------:|------|
+| `max_spawns_per_event` | `10` | 全局子 Agent 创建上限 |
+| `max_handoffs_per_event` | `20` | 全局任务移交上限 |
+| `max_context_turns` | `20` | persistent Agent 保留的上下文轮数 |
+| `trace_enabled` | `true` | 是否启用协作追踪 |
+| `model_blacklist` | `[]` | 禁止使用的模型列表 |
+| `model_filter_mode` | `blacklist` | 模型过滤模式（blacklist/whitelist） |
+| `allowed_models` | `[]` | 白名单模式时的允许模型列表 |
+
+## 🏗 架构
+
+```
+主 Agent (depth=0, full)
+ └─ spawn_agent() → 子 Agent (depth=1, safe/medium/full)
+     └─ transfer_to_agent() → 子 Agent 执行任务
+         └─ ❌ 无权再 spawn（depth>=1 拦截）
+```
+
+- **嵌套深度**：主 Agent depth=0，子 Agent depth=1 — 无法继续嵌套
+- **权限传递**：子 Agent 创建者权限 ≥ 目标权限（medium 不能创建 full）
+- **工具隔离**：子 Agent 工具集在 `_build_sub_tools` 中构建，深度≥1 自动移除 spawn/delete
+
+## 📋 可用工具
+
+| 工具 | 说明 |
 |------|------|
-| `spawn_agent` | 创建子 Agent，可选立即执行任务 |
-| `transfer_to_agent` | 向已创建的子 Agent 转交任务 |
-| `list_agents` | 查看所有活跃的子 Agent |
-| `delete_agent` | 销毁子 Agent 并清理上下文 |
-| `clear_agent_context` | 清空 Agent 对话历史（不销毁 Agent） |
-| `show_collaboration_report` | 查看协作追踪报告 |
+| `spawn_agent` | 创建子 Agent（仅主 Agent） |
+| `transfer_to_agent` | 移交任务给已有子 Agent |
+| `list_agents` | 列出所有活跃子 Agent |
+| `delete_agent` | 销毁子 Agent（仅主 Agent） |
+| `clear_agent_context` | 清空子 Agent 对话历史（仅主 Agent） |
+| `show_collaboration_report` | 查看协作追踪报告（仅主 Agent） |
 | `get_sub_agent_results` | 查询子 Agent 历史执行结果 |
 
-### spawn_agent 参数
-
-| 参数 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `name` | string | - | **必填**。子 Agent 名称（英文/数字/下划线） |
-| `description` | string | "" | 功能描述 |
-| `instruction` | string | "" | 系统指令/行为约束 |
-| `task` | string | "" | 任务内容，提供则创建后立即执行 |
-| `permission_level` | string | "safe" | `safe` / `medium` / `full` |
-| `provider_id` | string | "" | Provider ID，留空继承主 Agent |
-| `model` | string | "" | 模型名，留空继承主 Agent |
-| `persistent` | bool | false | 是否持久化（跨重启 + 上下文保留） |
-
-### transfer_to_agent 参数
-
-| 参数 | 类型 | 说明 |
-|------|------|------|
-| `name` | string | **必填**。子 Agent 名称 |
-| `task` | string | **必填**。任务描述 |
-
-## 使用示例
-
-```
-用户: 创建一个翻译助手，帮我翻译内容
-
-AI: spawn_agent(name="translator", description="中英翻译", instruction="你是专业翻译", task="翻译：Hello World")
-→ 子 Agent [translator] 创建并执行任务完成！结果: "你好世界"
-
-用户: 再帮翻译一句
-
-AI: transfer_to_agent(name="translator", task="翻译：Good morning")
-→ 子 Agent [translator] 执行完成。（Agent 已有 1 轮历史上下文）
-```
-
-### persistent Agent 示例
-
-```
-AI: spawn_agent(name="memory_bot", persistent=true, task="记住暗号：大漠孤烟直")
-→ Agent 确认存储
-
-AI: transfer_to_agent(name="memory_bot", task="暗号是什么？")
-→ Agent: "暗号是大漠孤烟直"  ← 因为上下文已保留
-```
-
-## 权限分级
-
-| 权限 | 可用工具 |
-|------|---------|
-| safe | 搜索工具 + spawn_agent + list_agents + get_sub_agent_results |
-| medium | 除 shell/python 外的所有工具 |
-| full | 全部工具 |
-
-## 配置
-
-在 AstrBot WebUI 插件配置中设置：
-
-| 配置项 | 类型 | 默认值 | 说明 |
-|--------|------|--------|------|
-| `model_blacklist` | list | [] | 模型黑名单 |
-| `model_filter_mode` | string | "blacklist" | 过滤模式：blacklist / whitelist |
-| `allowed_models` | list | [] | 白名单（whitelist 模式生效） |
-| `max_spawns_per_event` | int | 10 | 最大子 Agent 数量 |
-| `max_handoffs_per_event` | int | 20 | handoff 转交次数上限 |
-| `max_context_turns` | int | 20 | 每个 Agent 最大历史轮数 |
-| `trace_enabled` | bool | true | 是否启用协作追踪 |
-
-## 版本历史
-
-- **v0.6.1** — 配置项接入、代码清理、README 更新
-- **v0.6.0** — Bug #2 修复：persistent Agent 上下文跨调用保留
-- **v0.5.6** — Bug #1 修复：统一 transfer_to_agent 入口
-- **v0.5.5** — transfer_to handler 实际执行（已被 v0.5.6 替代）
-- **v0.5.4** — Bug #3/#4/#5 修复
-- **v0.3.0** — 安全熔断、参数校验、协作追踪
-- **v0.2.0** — HandoffTool 集成 + WebUI
-- **v0.1.0** — 基础 CRUD + 双生命周期
-
-## License
+## 📝 License
 
 MIT
