@@ -16,11 +16,12 @@ from astrbot.core.provider.register import llm_tools
 from astrbot.core import logger
 
 # ══════════════════════════════════════════════
-# Constants (defaults — can be overridden by config)
+# Constants (defaults — overridable by config)
 # ══════════════════════════════════════════════
 
 _HANDOFF_COUNT_KEY = "_dynamic_subagent_handoff_count"
 _AGENT_SPAWN_COUNT_KEY = "_dynamic_subagent_spawn_count"
+_TRACE_MAX_LEN = 50  # per unified_msg_origin
 
 _DEFAULT_MAX_HANDOFFS = 20
 _DEFAULT_MAX_SPAWNS = 10
@@ -95,27 +96,24 @@ class SubAgentStore:
 # ──────────────────────────────────────────────
 
 _PERMISSION_TOOLS: dict[str, list[str] | None] = {
-    # safe: 只允许安全的只读工具
     "safe": ["web_search", "send_message_to_user", "fetch_url"],
-    # medium: 允许所有工具
     "medium": None,
-    # full: 允许所有工具
     "full": None,
 }
 
 
 def _resolve_tool_names(cfg: SubAgentConfig) -> list[str] | None:
-    """根据 permission_level 和 tools 参数，解析最终的工具名列表"""
+    """根据 permission_level 和 tools 参数解析最终的工具名列表"""
     if cfg.tools is not None:
         return cfg.tools
     return _PERMISSION_TOOLS.get(cfg.permission_level)
 
 
 def _build_handoff_tool(cfg: SubAgentConfig) -> HandoffTool:
-    """为子 Agent 创建 HandoffTool，正确解析工具列表"""
+    """为子 Agent 创建 HandoffTool（无泛型语法，兼容 Python 3.8+）"""
     tool_names = _resolve_tool_names(cfg)
 
-    # 构建 FunctionTool 列表（从全局 llm_tools 注册表中查找）
+    # 从全局 llm_tools 注册表中查找对应的 FunctionTool
     tool_list = None
     if tool_names is not None:
         tool_list = []
@@ -124,7 +122,7 @@ def _build_handoff_tool(cfg: SubAgentConfig) -> HandoffTool:
             if ft and ft.active:
                 tool_list.append(ft)
 
-    agent = Agent[AstrAgentContext](
+    agent = Agent(
         name=cfg.name,
         instructions=cfg.system_prompt,
         tools=tool_list,
@@ -139,58 +137,22 @@ def _build_handoff_tool(cfg: SubAgentConfig) -> HandoffTool:
     return handoff
 
 
-# ══════════════════════════════════════════════
-# Safe HTML render (no Star mixin dependency)
-# ══════════════════════════════════════════════
-
-
-def _render_trace_to_html(trace: list[dict]) -> str:
-    """将追踪记录渲染为 HTML 片段，返回 data:image/svg+xml 或纯文本"""
-    import html as _html
-
-    parts = [
-        '<div style="font-family: \'Segoe UI\', \'Microsoft YaHei\', sans-serif; '
-        'max-width: 640px; padding: 24px; background: #fff;">',
-        '<h2 style="border-bottom: 2px solid #4A90D9; padding-bottom: 8px; '
-        'margin-top: 0; color: #333;">Sub-Agent Collaboration Report</h2>',
-    ]
-
-    for i, entry in enumerate(trace, 1):
-        status = entry.get("status", "success")
-        border_color = "#4A90D9" if status == "success" else "#E74C3C"
-        bg_color = "#F7FAFC" if status == "success" else "#FDF2F2"
-        ts = datetime.fromtimestamp(entry["timestamp"]).strftime("%H:%M:%S")
-        agent_name = _html.escape(str(entry.get("agent_name", "")))
-        task = _html.escape(entry.get("task", "''")[:200])
-        response = _html.escape(entry.get("response", "''")[:300])
-
-        parts.append(
-            f'<div style="margin: 14px 0; padding: 12px; border-radius: 6px; '
-            f'border-left: 4px solid {border_color}; background: {bg_color};">'
-            f'<div style="font-size: 12px; color: #999; margin-bottom: 4px;">'
-            f'Step {i} &middot; {agent_name} &middot; {ts}</div>'
-            f'<div style="font-size: 13px; color: #555; margin: 6px 0; line-height: 1.5;">'
-            f'<em>Task:</em> {task}</div>'
-            f'<div style="font-size: 13px; color: #333; margin: 6px 0; line-height: 1.5;">'
-            f'<em>Response:</em> {response}</div></div>'
-        )
-
-    parts.append(f"<p>Total steps: {len(trace)}</p>")
-    parts.append("</div>")
-    return "\n".join(parts)
+# ──────────────────────────────────────────────
+# Trace rendering（纯文本，不依赖图片渲染）
+# ──────────────────────────────────────────────
 
 
 def _format_trace_text(trace: list[dict]) -> str:
     """追踪报告纯文本格式"""
     lines = ["===== Sub-Agent Collaboration Report =====\n"]
     for i, entry in enumerate(trace, 1):
-        ts = datetime.fromtimestamp(entry["timestamp"]).strftime("%H:%M:%S")
+        ts = datetime.fromtimestamp(entry.get("timestamp", 0)).strftime("%H:%M:%S")
         label = "OK" if entry.get("status") == "success" else "ERROR"
         lines.append(
             f"[Step {i}] {ts} | {label}\n"
             f"  Agent: {entry.get('agent_name', '?')}\n"
-            f"  Task: {entry['task'][:200]}\n"
-            f"  Response: {entry['response'][:300]}\n"
+            f"  Task: {entry.get('task', '')[:200]}\n"
+            f"  Response: {entry.get('response', '')[:300]}\n"
         )
     lines.append(f"\nTotal steps: {len(trace)}")
     return "\n".join(lines)
@@ -232,7 +194,7 @@ class DynamicSubAgentPlugin(Star, PluginKVStoreMixin):
         self._persist_key = "dynamic_subagent_store"
         self._store: SubAgentStore = SubAgentStore()
 
-        # handoff 追踪
+        # handoff 追踪（按 unified_msg_origin 分桶）
         self._last_traces: dict[str, list[dict]] = {}
 
     # ── Lifecycle ──────────────────────────────
@@ -244,9 +206,13 @@ class DynamicSubAgentPlugin(Star, PluginKVStoreMixin):
         self._cleanup_stale_tools()
         self._register_web_apis()
         logger.info(
-            "DynamicSubAgent initialized: %d persistent + %d runtime agents",
+            "DynamicSubAgent initialized: %d persistent + %d runtime agents, "
+            "max_handoffs=%d max_spawns=%d trace=%s",
             len(self._store.agents),
             len(self._runtime_agents),
+            self._max_handoffs,
+            self._max_spawns,
+            self._trace_enabled,
         )
 
     async def terminate(self):
@@ -384,13 +350,16 @@ class DynamicSubAgentPlugin(Star, PluginKVStoreMixin):
         traces = self._last_traces.get(umo, [])
         traces.append(
             {
-                "agent_name": agent_name,
+                "agent_name": str(agent_name)[:100],
                 "task": str(task)[:500],
                 "response": str(response)[:500],
                 "status": status,
                 "timestamp": time.time(),
             }
         )
+        # 限制单桶大小，防内存泄漏
+        if len(traces) > _TRACE_MAX_LEN:
+            traces = traces[-_TRACE_MAX_LEN:]
         self._last_traces[umo] = traces
 
     # ── WebUI API routes ───────────────────────
@@ -590,9 +559,7 @@ class DynamicSubAgentPlugin(Star, PluginKVStoreMixin):
     )
     async def list_agents(self, event: AstrMessageEvent):
         """列出所有活跃的子 Agent"""
-        agents = []
-        agents.extend(self._runtime_agents.values())
-        agents.extend(self._store.agents.values())
+        agents = list(self._runtime_agents.values()) + list(self._store.agents.values())
 
         if not agents:
             return "当前没有任何活跃的子 Agent。"
@@ -603,7 +570,7 @@ class DynamicSubAgentPlugin(Star, PluginKVStoreMixin):
                 isinstance(f, HandoffTool) and f.name == a.tool_name
                 for f in llm_tools.func_list
             )
-            status = "🟢 可用" if tool_registered else "🔴 未注册"
+            status = "1. 可用" if tool_registered else "0. 未注册"
             lines.append(
                 f"- **{a.name}** (`{a.agent_id}`) {status}\n"
                 f"  - 生命周期: {a.lifecycle} | 权限: {a.permission_level}\n"
@@ -646,29 +613,12 @@ class DynamicSubAgentPlugin(Star, PluginKVStoreMixin):
 
     @filter.llm_tool(
         name="show_collaboration_report",
-        description="以图片展示当前对话的子 Agent 协作追踪报告。仅在所有 handoff 完成后调用一次。",
+        description="以文本形式展示当前对话的子 Agent 协作追踪报告。仅在所有 handoff 完成后调用一次。",
     )
     async def show_collaboration_report(self, event: AstrMessageEvent):
-        """展示子 Agent 协作追踪报告"""
+        """展示子 Agent 协作追踪报告（纯文本，无图片依赖）"""
         umo = event.unified_msg_origin
         trace = self._last_traces.get(umo, [])
         if not trace:
             return "本次对话中尚无子 Agent 协作记录。"
-
-        html = _render_trace_to_html(trace)
-
-        try:
-            # 尝试用 Star 的 html_render（需要 PluginHTMLRenderMixin）
-            if hasattr(self, "html_render"):
-                rendered = await self.html_render(
-                    html, {}, return_url=True  # type: ignore
-                )
-                await event.send(MessageChain().url_image(rendered))
-            else:
-                # fallback: 直接发纯文本
-                await event.send(MessageChain().message(_format_trace_text(trace)))
-        except Exception:
-            text = _format_trace_text(trace)
-            await event.send(MessageChain().message(text))
-
-        return "协作报告已发送给用户。"
+        return _format_trace_text(trace)
